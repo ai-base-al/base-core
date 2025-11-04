@@ -1,0 +1,23 @@
+# Example .gclient file
+# Copy this to the parent directory of base-core as .gclient
+# This file tells depot_tools how to fetch Chromium and dependencies
+
+solutions = [
+  {
+    "name": "src",
+    "url": "https://chromium.googlesource.com/chromium/src.git",
+    "managed": False,
+    "custom_deps": {
+      # Add any custom dependencies here
+    },
+    "custom_vars": {
+      # Checkout ungoogled-chromium specific configs if needed
+    },
+  },
+]
+
+# Target operating systems for cross-compilation
+target_os = ["linux", "win", "mac"]
+
+# Optional: Configure cache directory
+# cache_dir = "/path/to/cache"

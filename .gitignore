@@ -1,0 +1,53 @@
+# Build outputs
+out/
+build/Release/
+build/Debug/
+build/Component/
+build/Static/
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Compiled files
+*.pyc
+__pycache__/
+*.o
+*.a
+*.so
+*.dylib
+
+# Test outputs
+*.test
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.log
+.cache/
+
+# Environment files
+.env
+.env.local
+
+# Chromium source (if accidentally placed here)
+src/
+chromium/
+
+# gclient files
+.gclient
+.gclient_entries
+
+# Depot tools
+depot_tools/
