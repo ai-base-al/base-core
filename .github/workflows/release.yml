@@ -1,0 +1,57 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-macos:
+    name: Build macOS Release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          brew install ninja coreutils readline
+          pip3 install PySocks httplib2
+
+      - name: Install Metal toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
+
+      - name: Build browser
+        run: npm run build
+        timeout-minutes: 180
+
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/*.dmg
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            Base Core ${{ steps.get_version.outputs.VERSION }}
+
+            Download the .dmg file below and install on macOS 11.0+
+
+            Supports both Apple Silicon (arm64) and Intel (x86_64) Macs.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,10 +1,17 @@
 # Base Core
 
+[![Release](https://img.shields.io/github/v/release/ai-base-al/base-core)](https://github.com/ai-base-al/base-core/releases)
+[![License](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](LICENSE)
+
 A customized browser based on [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) for macOS, using a brave-core inspired architecture for easy feature development.
 
 ## Overview
 
 Base Core extends ungoogled-chromium with custom features while maintaining its privacy-focused philosophy. The repository structure is modeled after brave-core for easier development and maintenance.
+
+## Downloads
+
+[Download the latest release](https://github.com/ai-base-al/base-core/releases/latest) for macOS (supports both Apple Silicon and Intel Macs)
 
 ## Quick Start
 
@@ -220,6 +227,23 @@ Similar to how Brave extends Chromium, Base Core extends ungoogled-chromium.
 ## Branding
 
 Base browser icons and branding assets are in the `branding/` directory. The build process will use these to customize the browser appearance.
+
+## Releases
+
+See [RELEASES.md](RELEASES.md) for release process and version history.
+
+To create a new release:
+```bash
+# Update VERSION file
+echo "0.2.0" > VERSION
+
+# Commit and tag
+git add VERSION
+git commit -m "Prepare release v0.2.0"
+git tag -a v0.2.0 -m "Release v0.2.0"
+git push origin main
+git push origin v0.2.0
+```
 
 ## Contributing
 
