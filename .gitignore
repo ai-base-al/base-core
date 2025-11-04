@@ -1,9 +1,8 @@
-# Build outputs
+# Build outputs (ungoogled-chromium)
+build/src/
+build/download_cache/
+build/*.dmg
 out/
-build/Release/
-build/Debug/
-build/Component/
-build/Static/
 
 # Node modules
 node_modules/
@@ -41,13 +40,15 @@ coverage/
 .env
 .env.local
 
-# Chromium source (if accidentally placed here)
-src/
-chromium/
+# Signing and notarization
+notarize.zip
 
-# gclient files
+# macOS specific
+*.dSYM/
+
+# gclient files (if used)
 .gclient
 .gclient_entries
 
-# Depot tools
+# Depot tools (if used)
 depot_tools/

@@ -1,4 +1,4 @@
-# Example .gclient file
+# .gclient file for Base Core (macOS)
 # Copy this to the parent directory of base-core as .gclient
 # This file tells depot_tools how to fetch Chromium and dependencies
 
@@ -8,16 +8,22 @@ solutions = [
     "url": "https://chromium.googlesource.com/chromium/src.git",
     "managed": False,
     "custom_deps": {
-      # Add any custom dependencies here
+      # Skip unnecessary dependencies for faster sync
+      "src/chrome/test/data/perf/canvas_bench": None,
+      "src/chrome/test/data/perf/frame_rate/content": None,
+      "src/native_client": None,
+      "src/third_party/webgl/src": None,
     },
     "custom_vars": {
-      # Checkout ungoogled-chromium specific configs if needed
+      "checkout_mac": True,
+      "checkout_arm64": True,  # Set to False for Intel Macs
+      "checkout_x64": False,   # Set to True for Intel Macs
     },
   },
 ]
 
-# Target operating systems for cross-compilation
-target_os = ["linux", "win", "mac"]
+# Target macOS only
+target_os = ["mac"]
 
-# Optional: Configure cache directory
-# cache_dir = "/path/to/cache"
+# Optional: Configure cache directory for faster rebuilds
+# cache_dir = "/Users/YOUR_USERNAME/chromium-cache"
