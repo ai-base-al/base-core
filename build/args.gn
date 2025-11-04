@@ -1,16 +1,20 @@
-# Build arguments for Base Core
+# Build arguments for Base Core (macOS)
 # Import this file in your GN args: gn gen out/Release --args="import(\"//base/build/args.gn\")"
 
 # Base Core branding
 is_base_build = true
 base_chromium_build = true
 
+# macOS specific
+target_os = "mac"
+target_cpu = "arm64"  # Change to "x64" for Intel Macs
+is_component_build = false
+
 # Enable proprietary codecs for media support
 proprietary_codecs = true
 ffmpeg_branding = "Chrome"
 
 # Build configuration
-is_component_build = false
 is_debug = false
 is_official_build = true
 symbol_level = 0
@@ -40,9 +44,10 @@ enable_pdf = true
 enable_print_preview = true
 enable_basic_printing = true
 
-# Performance
+# Performance optimizations for macOS
 use_thin_lto = true
 chrome_pgo_phase = 0
 
-# Platform specific
-target_cpu = "x64"
+# macOS specific settings
+mac_deployment_target = "11.0"  # Minimum macOS Big Sur
+use_system_xcode = true
