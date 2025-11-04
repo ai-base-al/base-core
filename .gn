@@ -1,0 +1,20 @@
+# This file is used by GN to find the root of the source tree
+# and to set startup options.
+
+# The location of the build configuration file.
+buildconfig = "//build/config/BUILDCONFIG.gn"
+
+# The secondary source root is used for Chromium's dependencies.
+# This is the parent directory of base-core.
+secondary_source = ".."
+
+# These are the targets to check when running "gn check".
+check_targets = [
+  "//base:*",
+]
+
+# Default arguments for build configuration
+default_args = {
+  # Import Base Core build args by default
+  import("//base/build/args.gn")
+}

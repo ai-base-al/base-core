@@ -1,0 +1,56 @@
+{
+  "name": "base-core",
+  "version": "1.0.0",
+  "description": "Base Core - A customized ungoogled-chromium browser",
+  "main": "index.js",
+  "scripts": {
+    "init": "node ./script/init.js",
+    "sync": "node ./script/sync.js",
+    "apply_patches": "python3 ./script/apply_patches.py",
+    "build": "npm run build:Release",
+    "build:Release": "ninja -C ../out/Release base",
+    "build:Debug": "ninja -C ../out/Debug base",
+    "build:Component": "ninja -C ../out/Component base",
+    "build:Static": "ninja -C ../out/Static base",
+    "gn": "gn gen ../out/Release --args=\"import(\\\"//base/build/args.gn\\\")\"",
+    "test": "npm run test:unit && npm run test:browser",
+    "test:unit": "ninja -C ../out/Release base_unittests && ../out/Release/base_unittests",
+    "test:browser": "ninja -C ../out/Release browser_tests && ../out/Release/browser_tests",
+    "lint": "eslint . --ext .js,.ts,.tsx",
+    "format": "prettier --write \"**/*.{js,ts,tsx,json,md}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-base-al/base-core"
+  },
+  "keywords": [
+    "chromium",
+    "browser",
+    "ungoogled-chromium",
+    "privacy"
+  ],
+  "author": "Base Team",
+  "license": "MPL-2.0",
+  "config": {
+    "projects": {
+      "chrome": {
+        "repository": {
+          "url": "https://github.com/ungoogled-software/ungoogled-chromium.git",
+          "branch": "master"
+        },
+        "tag": "130.0.6723.116-1"
+      }
+    },
+    "chromiumVersion": "130.0.6723.116"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
