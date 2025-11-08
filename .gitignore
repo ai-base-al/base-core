@@ -4,6 +4,10 @@ build/download_cache/
 build/*.dmg
 out/
 
+# Logs directory
+logs/
+*.log
+
 # Node modules
 node_modules/
 npm-debug.log*
@@ -17,6 +21,7 @@ yarn-error.log*
 *.swo
 *~
 .DS_Store
+.claude/
 
 # Compiled files
 *.pyc
@@ -33,7 +38,6 @@ coverage/
 
 # Temporary files
 *.tmp
-*.log
 .cache/
 
 # Environment files
@@ -49,6 +53,16 @@ notarize.zip
 # gclient files (if used)
 .gclient
 .gclient_entries
+.gcs_entries
 
 # Depot tools (if used)
 depot_tools/
+
+# Backup directories
+base_src.backup/
+patches.backup/
+
+# Binaries directory (versioned builds saved here)
+# Uncomment the line below if you don't want to commit binaries
+# binaries/
+.temp_bin/
