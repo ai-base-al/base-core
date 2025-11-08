@@ -1,0 +1,229 @@
+--- a/chrome/app/chromium_strings.grd
++++ b/chrome/app/chromium_strings.grd
+@@ -294,10 +294,10 @@
+     <messages fallback_to_english="true">
+       <!-- Menus -->
+       <message name="IDS_PRODUCT_NAME" desc="The product name">
+-        Chromium
++        Base Dev
+       </message>
+       <message name="IDS_SHORT_PRODUCT_NAME" desc="The short product name">
+-        Chromium
++        Base Dev
+       </message>
+       <if expr="is_macosx">
+         <then>
+@@ -309,7 +309,7 @@
+         </then>
+       </if>
+       <message name="IDS_ABOUT_PRODUCT" desc="The About menu item">
+-        Chromium is a web browser that runs webpages and applications with lightning speed. It's fast, stable, and easy to use. Browse the web more safely with malware and phishing protection built into Base Dev.
++        Base Dev is a web browser built for privacy and speed. Browse the web safely with malware and phishing protection built in.
+       </message>
+       <if expr="is_macosx">
+         <message name="IDS_ABOUT_MAC" desc="The About menu label in the macOS menu bar">
+@@ -403,10 +403,10 @@
+       </message>
+       <if expr="not use_titlecase">
+         <message name="IDS_NEW_TAB_TITLE" desc="Title of the new tab page, not to be confused with the action of opening a new tab.">
+-          <ph name="PAGE_TITLE">$1<ex>Google</ex></ph> - Chromium
++          <ph name="PAGE_TITLE">$1<ex>Google</ex></ph> - Base Dev
+         </message>
+         <message name="IDS_NEW_TAB_TITLE_FLIPPED" desc="Title of the new tab page, not to be confused with the action of opening a new tab. Flipped variant, showing the product name first.">
+-          Chromium - <ph name="PAGE_TITLE">$1<ex>Google</ex></ph>
++          Base Dev - <ph name="PAGE_TITLE">$1<ex>Google</ex></ph>
+         </message>
+       </if>
+       <message name="IDS_COPYRIGHT_LINE_1" desc="The copyright string for the contents of the About dialog">
+@@ -527,28 +527,28 @@
+         Chromium may not function correctly because it is no longer supported on this Linux distribution
+       </message>
+       <message name="IDS_APP_NAME" desc="The application name">
+-        Chromium
++        Base Dev
+       </message>
+       <if expr="is_macosx or is_win or is_linux">
+         <message name="IDS_BROWSER_HUNGBROWSER_MESSAGE" desc="Text displayed when browser process is hung">
+-          Chromium is unresponsive. Relaunch now?
++          Base Dev is unresponsive. Relaunch now?
+         </message>
+       </if>
+       <if expr="is_win">
+         <message name="IDS_UNINSTALL_CLOSE_APP" desc="Message to user when uninstall detects other app still running">
+-          Please close all Chromium windows and try again.
++          Please close all Base Dev windows and try again.
+         </message>
+         <message name="IDS_UNINSTALL_VERIFY" desc="Message to confirm user wants to uninstall">
+-          Are you sure you want to uninstall Chromium?
++          Are you sure you want to uninstall Base Dev?
+         </message>
+       </if>
+       <message name="IDS_OPTIONS_MAKE_DEFAULT" desc="The text of the button that makes the browser the default browser">
+-        Make Chromium the default browser
++        Make Base Dev the default browser
+       </message>
+       <if expr="is_macosx">
+         <message name="IDS_OPTIONS_SHOW_IN_BACKGROUND_MAC" desc="The checkbox's label for making the app run in the background">
+-          Let Chromium Run in the Background
++          Let Base Dev Run in the Background
+         </message>
+       </if>
+       <message name="IDS_ABOUT_PRODUCT_COPYRIGHT" desc="About box copyright text">
+@@ -614,28 +614,28 @@
+       </message>
+       <if expr="not is_ios">
+         <message name="IDS_PASSWORD_MANAGER_LEAK_HELP_MESSAGE" desc="Text used to describe a password leak detection service of the password manager in about password check.">
+-          Chromium lets you know if your passwords are ever compromised
++          Base Dev lets you know if your passwords are ever compromised
+         </message>
+       </if>
+       <if expr="is_win or is_linux or is_macosx">
+         <message name="IDS_OS_AUTHENTICATION_DIALOG_SITE_DATA_PROMPT" desc="Text on a prompt to allow access to site data from the OS with the application name">
+-          Chromium
++          Base Dev
+         </message>
+       </if>
+       <message name="IDS_SETTINGS_TITLE" desc="The title of the settings page">
+-        Chromium
++        Base Dev
+       </message>
+       <message name="IDS_PRODUCT_DESCRIPTION" desc="Application description">
+-        Chromium
++        Base Dev
+       </message>
+       <if expr="is_macosx">
+         <message name="IDS_HELPER_NAME" desc="The helper bundle's name">
+-          Chromium Helper
++          Base Dev Helper
+         </message>
+         <message name="IDS_HELPER_ALERTS_NAME" desc="The alerts helper bundle's name">
+-          Chromium Helper (Alerts)
++          Base Dev Helper (Alerts)
+         </message>
+       </if>
+       <message name="IDS_CUSTOMIZE_YOUR_CHROME_BUTTON" desc="Button text that opens the browser customization side panel. The term 'Chrome' must be preserved because it is a product name, and the user will recognize it with this term, not with the word 'Browser'.">
+@@ -649,7 +649,7 @@
+       <if expr="is_win or is_macosx or is_linux">
+         <message name="IDS_ACCNAME_APP" desc="The accessible name for the application.">
+-          Chromium
++          Base Dev
+         </message>
+         <message name="IDS_PROFILES_MANAGE_USERS_BUTTON_LABEL" desc="The label that appears on the button the user can click to manage multiple users. 'Profiles' refers to 'User Profiles'.">
+           &amp;Manage Chromium Profiles
+@@ -949,10 +949,10 @@
+       <if expr="is_macosx or is_win or is_linux or is_fuchsia">
+         <message name="IDS_SETTINGS_MENU_BUTTON_TOOLTIP" desc="The tooltip for the settings menu button">
+-          Customize and control Chromium
++          Customize and control Base Dev
+         </message>
+         <message name="IDS_SETTINGS_MENU_BUTTON_TOOLTIP_UPDATES_AVAILABLE" desc="The tooltip for the settings menu button if updates are available.">
+-          Customize and control Chromium. Update is available.
++          Customize and control Base Dev. Update is available.
+         </message>
+       </if>
+       <message name="IDS_ABOUT_CHROME_MENU" desc="The text label of the About Chromium menu item">
+@@ -1009,7 +1009,7 @@
+       </if>
+       <if expr="is_macosx">
+         <message name="IDS_PRODUCT_MAC_APP_NAME" desc="The application name displayed in Chrome's application bundle.">
+-          Chromium
++          Base Dev
+         </message>
+         <message name="IDS_HELPER_MAC_APP_NAME" desc="The helper application name displayed in Chrome's helper application bundle.">
+           Chromium Helper
+@@ -1428,7 +1428,7 @@
+       <if expr="is_win or is_macosx or is_linux">
+         <message name="IDS_FR_BUBBLE_MAKE_DEFAULT" desc="A label for the button the user can click to make the browser their default browser. Used when prompting the user on first run.">
+-          Set Chromium as your default browser
++          Set Base Dev as your default browser
+         </message>
+       </if>
+       <message name="IDS_FR_CUSTOMIZE_DEFAULT_BROWSER" desc="A label for a checkbox the user can select to set Chrome as the default browser [CHAR_LIMIT=40]">
+@@ -1589,7 +1589,7 @@
+       </message>
+       <if expr="is_macosx or is_win or is_linux">
+         <message name="IDS_RELAUNCH_TO_UPDATE" desc="Button text in the menu. When the user clicks this, the browser restarts so that an available update is applied.">
+-          Relaunch to update &amp;Chromium
++          Relaunch to update &amp;Base Dev
+         </message>
+       </if>
+       <message name="IDS_UPDATE_NOTIFICATION_TITLE" desc="Title of the notification shown when a new version of the browser is available">
+@@ -1601,7 +1601,7 @@
+       </message>
+       <message name="IDS_UPGRADE_BUBBLE_TITLE" desc="The title of a bubble window that encourages users to restart Chrome as soon as possible so a security update can take effect.">
+-        Update Chromium
++        Update Base Dev
+       </message>
+       <message name="IDS_SETTINGS_INCOMPATIBLE_APPLICATIONS" desc="The chrome://settings page tab title for the incompatible applications page">
+         Incompatible applications
+@@ -1742,7 +1742,7 @@
+       </message>
+       <if expr="is_macosx">
+         <message name="IDS_HISTORY_TITLE" desc="Title for the history tab.">
+-          Chromium history
++          Base Dev history
+         </message>
+       </if>
+     </messages>
+--- a/chrome/app/settings_chromium_strings.grdp
++++ b/chrome/app/settings_chromium_strings.grdp
+@@ -22,10 +22,10 @@
+     </message>
+     <message name="IDS_SETTINGS_GET_HELP_USING_CHROME" desc="Text of the button which takes the user to the Chrome help page.">
+-      Get help with Chromium
++      Get help with Base Dev
+     </message>
+     <message name="IDS_SETTINGS_UPGRADE_UPDATING" desc="Status label: Updating Chromium">
+-      Updating Chromium
++      Updating Base Dev
+     </message>
+     <message name="IDS_SETTINGS_UPGRADE_UPDATING_PERCENT" desc="Status label: Updating Chromium (90%)">
+       Updating Chromium (<ph name="PROGRESS_PERCENT">$1<ex>90%</ex></ph>)
+@@ -37,7 +37,7 @@
+     </message>
+     <message name="IDS_SETTINGS_UPGRADE_UP_TO_DATE" desc="Status label: Already up to date (Chromium)">
+-      Chromium is up to date
++      Base Dev is up to date
+     </message>
+     <message name="IDS_SETTINGS_UPGRADE_CHANNEL" desc="Status label: Chromium update channel">
+       Channel
+@@ -51,31 +51,31 @@
+     </message>
+     <message name="IDS_SETTINGS_NO_PASSWORDS_CHECKED" desc="Error message when password check failed due to network issues.">
+-      Chromium can't check your passwords. Try checking your internet connection.
++      Base Dev can't check your passwords. Try checking your internet connection.
+     </message>
+     <message name="IDS_SETTINGS_SIGNED_OUT_USER_LABEL" desc="Label telling the user that signed-out users can't use the password check feature.">
+-      Chromium can check your passwords when you sign in with your Google Account
++      Base Dev can check your passwords when you sign in with your Google Account
+     </message>
+     <message name="IDS_SETTINGS_SIGNED_OUT_USER_HAS_NO_PASSWORDS_LABEL" desc="Label telling the user that signed-out users who also don't have passwords saved can't use the password check feature.">
+-      No saved passwords. Chromium can check your passwords when you save them.
++      No saved passwords. Base Dev can check your passwords when you save them.
+     </message>
+     <message name="IDS_SETTINGS_WEAKLY_PROTECTED_PASSWORDS_DESCRIPTION" desc="Description telling users that weak passwords are easy to guess and that Chrome can help create and remember strong passwords.">
+-      Weak passwords are easy to guess. Let Chromium <ph name="BEGIN_LINK">&lt;a target='_blank' href='$1'&gt;</ph>create and remember strong passwords for you<ph name="END_LINK">&lt;/a&gt;</ph>.
++      Weak passwords are easy to guess. Let Base Dev <ph name="BEGIN_LINK">&lt;a target='_blank' href='$1'&gt;</ph>create and remember strong passwords for you<ph name="END_LINK">&lt;/a&gt;</ph>.
+     </message>
+     <message name="IDS_SETTINGS_DEFAULT_BROWSER_DEFAULT" desc="The text displayed when Chrome is not the default browser">
+-      Chromium is your default browser
++      Base Dev is your default browser
+     </message>
+     <message name="IDS_SETTINGS_DEFAULT_BROWSER_MAKE_DEFAULT" desc="Default browser checkbox label">
+-      Make Chromium the default browser
++      Make Base Dev the default browser
+     </message>
+     <message name="IDS_SETTINGS_DEFAULT_BROWSER_UNKNOWN" desc="The text displayed when Chrome cannot determine or set the default browser">
+-      Chromium cannot determine or set the default browser
++      Base Dev cannot determine or set the default browser
+     </message>
+     <message name="IDS_SETTINGS_DEFAULT_BROWSER_SECONDARY" desc="The text displayed when the secondary profile cannot be made the default browser">
+-      This is a secondary installation of Chromium, and cannot be made your default browser.
++      This is a secondary installation of Base Dev, and cannot be made your default browser.
+     </message>
+     <message name="IDS_SETTINGS_SYNC_PERSONALIZE" desc="Title of the section containing settings for syncing and personalizing Chrome across your devices.">
+-      Sync and personalize Chromium across your devices
++      Sync and personalize Base Dev across your devices
+     </message>
+   </messages>
+ </grit-part>
