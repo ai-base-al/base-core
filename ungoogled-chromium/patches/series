@@ -11,3 +11,4 @@ ungoogled-chromium/macos/build-bindgen-target-override.patch
 ungoogled-chromium/macos/bindgen-disable-static.patch
 ungoogled-chromium/disable-rust-version-check.patch
 ungoogled-chromium/base-branding-strings.patch
+ungoogled-chromium/basedev-sidepanel-aiassistant.patch
