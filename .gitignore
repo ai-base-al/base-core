@@ -62,7 +62,12 @@ depot_tools/
 base_src.backup/
 patches.backup/
 
-# Binaries directory (versioned builds saved here)
-# Uncomment the line below if you don't want to commit binaries
-# binaries/
+# Binaries directory (versioned builds saved to disk, not committed)
+binaries/
 .temp_bin/
+*.app
+*.dmg
+*.icns
+branding/generated_icons/
+features/branding/icons/*.png
+features/branding/icons/*.icns
