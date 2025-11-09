@@ -115,10 +115,66 @@ if [ -f "$STRINGS_FILE" ]; then
     echo -e "  ${DIM}→ chrome/app/chromium_strings.grd${NC}"
 fi
 
-# 6. Create/Update icons (placeholder)
-echo -e "${GREEN}✓${NC} Icon placeholders created..."
-echo -e "  ${DIM}→ Custom icons will be added in icons/ directory${NC}"
-echo -e "  ${YELLOW}ℹ${NC}  ${DIM}For now, we'll use default Chromium icons${NC}"
+# 6. Generate fresh icons from SVG sources
+echo -e "${GREEN}✓${NC} Generating icons from SVG sources..."
+if [ -x "$SCRIPT_DIR/scripts/generate_icons.sh" ]; then
+    "$SCRIPT_DIR/scripts/generate_icons.sh"
+else
+    echo -e "  ${YELLOW}⚠️  Icon generation script not found or not executable${NC}"
+fi
+
+# 6b. Replace icons with Base Dev branding
+echo -e "${GREEN}✓${NC} Replacing app icons..."
+ICONS_SRC="$SCRIPT_DIR/icons"
+ICON_COUNT=0
+
+if [ -d "$ICONS_SRC" ]; then
+    # Replace main app icon (app.icns)
+    APP_ICON_DEST="$SRC_DIR/chrome/app/theme/chromium/mac/app.icns"
+    if [ -f "$ICONS_SRC/app.icns" ] && [ -f "$APP_ICON_DEST" ]; then
+        if [ ! -f "$APP_ICON_DEST.orig" ]; then
+            cp "$APP_ICON_DEST" "$APP_ICON_DEST.orig"
+        fi
+        cp "$ICONS_SRC/app.icns" "$APP_ICON_DEST"
+        echo -e "  ${DIM}→ Replaced app.icns${NC}"
+        ((ICON_COUNT++))
+    fi
+
+    # Replace document icon if exists
+    DOC_ICON_DEST="$SRC_DIR/chrome/app/theme/chromium/mac/document.icns"
+    if [ -f "$ICONS_SRC/document.icns" ] && [ -f "$DOC_ICON_DEST" ]; then
+        if [ ! -f "$DOC_ICON_DEST.orig" ]; then
+            cp "$DOC_ICON_DEST" "$DOC_ICON_DEST.orig"
+        fi
+        cp "$ICONS_SRC/document.icns" "$DOC_ICON_DEST"
+        echo -e "  ${DIM}→ Replaced document.icns${NC}"
+        ((ICON_COUNT++))
+    fi
+
+    # Replace product logo PNGs
+    PRODUCT_LOGO_DIR="$SRC_DIR/chrome/app/theme/chromium"
+    if [ -f "$ICONS_SRC/product_logo_name_22.png" ]; then
+        for logo_file in product_logo_name_22.png product_logo_name_22@2x.png \
+                         product_logo_name_22_white.png product_logo_name_22_white@2x.png; do
+            if [ -f "$ICONS_SRC/$logo_file" ]; then
+                DEST="$PRODUCT_LOGO_DIR/$logo_file"
+                if [ -f "$DEST" ]; then
+                    if [ ! -f "$DEST.orig" ]; then
+                        cp "$DEST" "$DEST.orig"
+                    fi
+                    cp "$ICONS_SRC/$logo_file" "$DEST"
+                    echo -e "  ${DIM}→ Replaced $logo_file${NC}"
+                    ((ICON_COUNT++))
+                fi
+            fi
+        done
+    fi
+
+    echo -e "  ${GREEN}✓${NC} Replaced $ICON_COUNT icon files"
+else
+    echo -e "  ${YELLOW}⚠️  Icon directory not found: $ICONS_SRC${NC}"
+    echo -e "  ${DIM}Using default Chromium icons${NC}"
+fi
 
 # 7. Create patch file for reference
 echo -e "${GREEN}✓${NC} Creating patch file..."

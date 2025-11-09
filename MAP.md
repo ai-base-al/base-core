@@ -55,9 +55,25 @@ Complete directory and file map for the base-core ungoogled-chromium build repos
 - Automatic depot_tools patching for Python 3.14 compatibility
 - See: `SCRIPTS_UPDATED.md`
 
-### `/tools/` - Utility Scripts and Patches
-**Purpose**: Additional tools for fixing build issues
+### `/tools/` - Development Tools and Utilities
+**Purpose**: Development tools for creating features and fixing build issues
 
+**Development Tools:**
+- `sidepanel.sh` - Automated side panel generator
+  - Usage: `./tools/sidepanel.sh <PanelName> ["description"]`
+  - Generates complete side panel implementation with all files
+  - Creates patch file automatically in `patches/ungoogled-chromium/`
+  - Adds to `patches/series` automatically
+  - Uses `basedev_` naming convention throughout
+  - Example: `./tools/sidepanel.sh Reading "Clean reading mode"`
+  - See: `tools/README.md` for full documentation
+
+- `README.md` - Documentation for development tools
+  - Side panel generator usage and examples
+  - Generated file structure explanation
+  - Workflow and customization guide
+
+**Build Utilities:**
 - `patch_depot_tools.py` - Fixes Python 3.14 AST compatibility
   - Patches gclient_eval.py for ast.Str → ast.Constant
   - Updates 330 files to use python3.11
@@ -177,6 +193,82 @@ Status: These may be outdated, use `/scripts/` for primary workflow
 **Purpose**: Log files from builds
 
 Currently empty or minimal
+
+### `/guides/` - Development Guides
+**Purpose**: Comprehensive guides for Base Browser development
+
+- `SIDEPANEL.md` - Complete guide for creating custom side panels
+  - Adapted for our ungoogled-chromium patch-based workflow
+  - All paths specific to Base Browser setup
+  - Step-by-step implementation guide
+  - Includes complete Reading Mode example
+  - Backend (C++, Mojo), Coordinator, Frontend (HTML, CSS, TypeScript)
+  - Integration points and troubleshooting
+  - Use with `./tools/sidepanel.sh` for automated generation
+
+- `BASEDEV_NAMING.md` - Naming convention for all custom features
+  - `basedev_` prefix for all custom code
+  - Naming patterns for patches, directories, classes, enums, URLs, resources
+  - Quick reference table with examples
+  - Benefits and migration guide
+  - Developer checklist
+
+### `/progress/` - Feature Progress Tracking
+**Purpose**: Track features across past, current, and future development
+
+```
+progress/
+├── past/       # Completed features with outcomes and learnings
+├── current/    # Features actively being developed
+├── future/     # Planned features and roadmap
+├── TEMPLATE.md # Template for new feature documentation
+└── README.md   # Progress tracking system documentation
+```
+
+**Completed Features** (`past/`):
+- `initial-build-system.md` - Complete build system setup
+- `development-tools-and-guides.md` - Dev tools and documentation
+
+**Current Focus** (`current/` - actively working on):
+- `complete-branding-system.md` - Base Dev branding (strings + icons)
+  - Status: Design complete, documentation complete, testing pending
+  - 352 string replacements, 5 SVG sources, 14+ generated assets
+  - Guides: `guides/BRANDING.md`, `branding/ASSETS.md`
+
+**Future Features** (`future/` - planned and documented):
+- `integrated-code-editor.md` - Monaco Editor + File Explorer + Terminal
+  - Custom tab type (chrome://code/)
+  - VS Code-inspired UX patterns
+  - Trusted folder access, real shell integration
+  - LSP support for code intelligence
+
+- `ai-assistant-with-mcp.md` - Framework-aware AI Assistant
+  - MCP (Model Context Protocol) server integration
+  - Auto-detects frameworks (Nuxt, Next, Go, Flutter, Base)
+  - BrowserMCP for web UI development
+  - Centralized framework registry (updateable from base.al)
+  - Context-aware (browser mode vs code editor mode)
+
+- `login-with-base.md` - OAuth authentication with accounts.base.al
+  - Replace Google OAuth (removed by ungoogled-chromium)
+  - Local profile creation on login
+  - Secure token storage
+  - Optional settings sync (future)
+  - Offline work after initial login
+
+**Usage:**
+```bash
+# Create new feature documentation
+cp progress/TEMPLATE.md progress/current/my-feature.md
+
+# Move completed features
+mv progress/current/my-feature.md progress/past/
+```
+
+**Vision - Base Browser 3-in-1**:
+1. **Browser** (ready - Chromium-based)
+2. **Code Editor** (planned - Monaco + custom sidepanels)
+3. **AI Assistant** (planned - framework-aware + MCP servers)
 
 ### `/docs/` - Documentation
 **Purpose**: Project documentation
@@ -317,6 +409,14 @@ ungoogled-chromium/build/src/
 ---
 
 ## Quick Commands
+
+**Development:**
+```bash
+# Generate a new side panel
+./tools/sidepanel.sh Reading "Clean reading mode"
+./tools/sidepanel.sh Notes "Quick note-taking"
+./tools/sidepanel.sh Translate "Built-in translation"
+```
 
 **Build:**
 ```bash
