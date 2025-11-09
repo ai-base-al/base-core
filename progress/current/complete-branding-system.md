@@ -136,6 +136,26 @@ chrome/app/theme/
   - Generated icons: branding/generated_icons/ (complete set)
   - Source SVGs: branding/*.svg (5 variants)
 
+### 2025-11-09 - Implementation
+- Applied string replacements to source files:
+  - chromium_strings.grd: Chromium → Base Dev (global sed replacement)
+  - settings_strings.grdp: "You and Google" → "Your Account"
+  - shared_settings_strings.grdp: "Sync and Google services" → "Sync and Services"
+- Updated URLs: chrome://ungoogled-first-run → chrome://base-first-run
+  - Modified ungoogled_first_run.h
+  - Modified chrome_browser_main.cc
+  - Modified webui_url_constants.cc
+- Updated macOS Info.plist files:
+  - Main app: CFBundleName, CFBundleDisplayName, CFBundleIdentifier → al.base.BaseDev
+  - Framework: CFBundleIdentifier → al.base.BaseDev.framework
+  - All 5 Helper apps: Bundle names → "Base Dev Helper", IDs → al.base.BaseDev.helper
+- Updated Assets.xcassets source files:
+  - AppIcon.appiconset: Replaced all 7 icon sizes (16-1024px)
+  - Icon.iconset: Replaced icon_256x256.png and @2x variant
+- Replaced product_logo_32.png with Base Dev icon
+- Rebuilt browser to compile new Assets.car
+- **Known Issue**: Icon still showing as old Chromium in some contexts (deferred to later)
+
 ## Challenges & Solutions
 
 ### Challenge 1: String Coverage
