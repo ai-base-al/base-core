@@ -1,0 +1,3090 @@
+diff --git a/build/src/chrome/browser/resources/BUILD.gn b/build/src/chrome/browser/resources/BUILD.gn
+new file mode 100644
+index 0000000..29aaa2b
+--- /dev/null
++++ b/build/src/chrome/browser/resources/BUILD.gn
+@@ -0,0 +1,421 @@
++# Copyright 2014 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//chrome/browser/buildflags.gni")
++import("//chrome/common/features.gni")
++import("//components/compose/features.gni")
++import("//components/enterprise/buildflags/buildflags.gni")
++import("//content/browser/devtools/features.gni")
++import("//pdf/features.gni")
++import("//printing/buildflags/buildflags.gni")
++import("//third_party/closure_compiler/compile_js.gni")
++import("//tools/grit/grit_rule.gni")
++import("//tools/grit/repack.gni")
++import("//ui/webui/webui_features.gni")
++
++assert(!is_ios, "Chromium/iOS shouldn't use anything in //chrome")
++assert(!is_fuchsia, "Fuchsia shouldn't use anything in //chrome")
++
++group("resources") {
++  public_deps = [
++    "connectors_internals:resources",
++    "saved_tab_groups_unsupported:resources",
++    "segmentation_internals:resources",
++  ]
++
++  if (enable_extensions_core) {
++    public_deps += [ ":component_extension_resources" ]
++  }
++
++  if (!is_android) {
++    public_deps += [
++      ":app_icon_resources",
++      ":dev_ui_paks",
++      "about_sys:resources",
++      "access_code_cast:resources",
++      "actor_overlay:resources",
++      "app_service_internals:resources",
++      "autofill_ml_internals:resources",
++      "basedev_code:resources",
++      "bookmarks:resources",
++      "certificate_manager:resources",
++      "commerce/product_specifications:resources",
++      "contextual_tasks:resources",
++      "data_sharing:resources",
++      "downloads:resources",
++      "feedback:resources",
++      "gaia_auth_host:resources",
++      "history:resources",
++      "inspect:resources",
++      "key_value_pair_viewer_shared:resources",
++      "lens/overlay:resources",
++      "lens/shared:resources",
++      "management:resources",
++      "new_tab_footer:resources",
++      "new_tab_page:resources",
++      "new_tab_page/untrusted:resources",
++      "new_tab_page_instant:resources",
++      "new_tab_page_third_party:resources",
++      "new_tab_shared:resources",
++      "omnibox_popup:resources",
++      "password_manager:resources",
++      "privacy_sandbox:resources",
++      "privacy_sandbox/internals:resources",
++      "profile_internals:resources",
++      "search_engine_choice:resources",
++      "settings:resources",
++      "settings_shared:resources",
++      "side_panel/bookmarks:resources",
++      "side_panel/comments:resources",
++      "side_panel/commerce:resources",
++      "side_panel/customize_chrome:resources",
++      "side_panel/history:resources",
++      "side_panel/history_clusters:resources",
++      "side_panel/read_anything:resources",
++      "side_panel/reading_list:resources",
++      "side_panel/shared:resources",
++      "signin:resources",
++      "suggest_internals:resources",
++      "support_tool:resources",
++      "tab_group_home:resources",
++      "tab_search:resources",
++      "tab_strip_api:resources",
++      "web_app_internals:resources",
++      "webui_browser:resources",
++      "webui_gallery:resources",
++      "whats_new:resources",
++    ]
++    if (is_chrome_branded) {
++      public_deps += [ "media_router/cast_feedback:resources" ]
++    }
++  }
++
++  if (is_chromeos) {
++    public_deps += [
++      "ash/extended_updates:resources",
++      "ash/inline_login:resources",
++      "ash/settings:resources",
++      "chromeos:resources",
++      "chromeos/dlp_internals:resources",
++    ]
++  }
++
++  if (enable_extensions) {
++    public_deps += [
++      "accessibility:reading_mode_gdocs_extension_resources",
++      "extensions_zero_state_promo:resources",
++    ]
++  }
++
++
++  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android) {
++    public_deps += [ "discards:resources" ]
++  }
++
++  if (is_win || is_mac || is_linux) {
++    public_deps += [
++      "app_home:resources",
++      "app_settings:resources",
++      "browser_switch:resources",
++      "on_device_translation_internals:resources",
++      "signin/history_sync_optin:resources",
++    ]
++  }
++
++  if (!is_android && !is_chromeos) {
++    public_deps += [
++      "inline_login:resources",
++      "signin/profile_picker:resources",
++    ]
++  }
++
++  if (enable_dice_support) {
++    public_deps += [
++      "intro:resources",
++      "signin/batch_upload:resources",
++      "signin/signout_confirmation:resources",
++    ]
++  }
++
++  if (enable_webui_tab_strip) {
++    public_deps += [ "tab_strip:resources" ]
++  }
++
++  if (enable_extensions_core) {
++    public_deps += [ "extensions:resources" ]
++  }
++
++  if (enable_pdf) {
++    public_deps += [ "pdf:resources" ]
++  }
++
++  if (enable_print_preview) {
++    if (is_chromeos) {
++      public_deps += [ "ash/print_preview:resources" ]
++    } else {
++      public_deps += [ "print_preview:resources" ]
++    }
++  }
++
++  if (enable_webui_certificate_viewer) {
++    public_deps += [ "certificate_viewer:resources" ]
++  }
++
++  if (enable_compose) {
++    public_deps += [ "compose:resources" ]
++  }
++
++  if (enable_glic) {
++    public_deps += [
++      "glic:resources",
++      "glic/fre:resources",
++    ]
++  }
++
++  if (enterprise_watermark) {
++    public_deps += [ "watermark:resources" ]
++  }
++}
++
++if (enable_webui_generate_code_cache) {
++  group("code_cache_resources") {
++    public_deps = [
++      "side_panel/bookmarks:code_cache_resources",
++      "side_panel/customize_chrome:code_cache_resources",
++      "side_panel/reading_list:code_cache_resources",
++      "side_panel/shared:code_cache_resources",
++    ]
++  }
++}
++
++if (is_chromeos && enable_js_type_check) {
++  group("closure_compile") {
++    deps = [
++      "chromeos:closure_compile",
++      "chromeos/contact_center_insights:closure_compile",
++      "gaia_auth_host:closure_compile",
++    ]
++  }
++}
++
++if (enable_extensions_core) {
++  grit("component_extension_resources") {
++    source = "component_extension_resources.grd"
++
++    defines = chrome_grit_defines
++    if (enable_hangout_services_extension) {
++      defines += [ "enable_hangout_services_extension" ]
++    }
++
++    # Some resources within component_extension_resources.grd are generated at
++    # build time so we include them as explicit dependencies here
++    if (is_chromeos) {
++      deps = [
++        "chromeos/accessibility/braille_ime:ts_build",
++        "chromeos/contact_center_insights:generate_ccaas_deps",
++        "chromeos/desk_api:generate_desk_api_bundle",
++      ]
++    }
++
++    outputs = [
++      "grit/component_extension_resources.h",
++      "grit/component_extension_resources_map.cc",
++      "grit/component_extension_resources_map.h",
++      "component_extension_resources.pak",
++    ]
++    output_dir = "$root_gen_dir/chrome"
++  }
++}
++
++if (!is_android) {
++  grit("app_icon_resources") {
++    source = "app_icon/app_icon_resources.grd"
++    defines = chrome_grit_defines
++    outputs = [
++      "grit/app_icon_resources.h",
++      "grit/app_icon_resources_map.cc",
++      "grit/app_icon_resources_map.h",
++      "app_icon_resources_100_percent.pak",
++      "app_icon_resources_200_percent.pak",
++    ]
++    output_dir = "$root_gen_dir/chrome"
++  }
++
++  if (is_chromeos) {
++    grit("office_web_app_resources") {
++      source = "office_web_app/resources.grd"
++      defines = chrome_grit_defines
++      outputs = [
++        "grit/office_web_app_resources.h",
++        "grit/office_web_app_resources_map.cc",
++        "grit/office_web_app_resources_map.h",
++        "office_web_app_resources.pak",
++      ]
++      output_dir = "$root_gen_dir/chrome"
++    }
++  }
++
++  if (is_chrome_branded) {
++    grit("preinstalled_web_apps_resources") {
++      source = "preinstalled_web_apps/resources.grd"
++      defines = chrome_grit_defines
++      outputs = [
++        "grit/preinstalled_web_apps_resources.h",
++        "grit/preinstalled_web_apps_resources_map.cc",
++        "grit/preinstalled_web_apps_resources_map.h",
++        "preinstalled_web_apps_resources.pak",
++      ]
++      output_dir = "$root_gen_dir/chrome"
++    }
++  }
++}
++
++group("dev_ui_resources") {
++  public_deps = [
++    "accessibility:resources",
++    "bluetooth_internals:resources",
++    "browsing_topics:resources",
++    "components:resources",
++    "device_log:resources",
++    "engagement:resources",
++    "family_link_user_internals:resources",
++    "location_internals:resources",
++    "media:resources",
++    "memory_internals:resources",
++    "net_internals:resources",
++    "omnibox:resources",
++    "predictors:resources",
++    "privacy_sandbox/internals:resources",
++    "usb_internals:resources",
++    "//components/commerce/core/internals/resources",
++    "//components/data_sharing/data_sharing_internals/resources",
++    "//components/download/resources/download_internals:resources",
++    "//components/history_clusters/history_clusters_internals/resources",
++    "//components/metrics/debug:resources",
++    "//components/ntp_tiles/webui/resources",
++    "//components/optimization_guide/optimization_guide_internals/resources",
++    "//components/policy/resources/webui:resources",
++    "//components/resources:dev_ui_components_resources",
++    "//components/signin/core/browser/resources",
++    "//components/sync/service/resources",
++    "//components/ukm/debug:resources",
++    "//content/browser/resources/gpu:resources",
++    "//content/browser/resources/media:resources",
++    "//content/browser/resources/net:resources",
++    "//content/browser/resources/process:resources",
++    "//content/browser/resources/service_worker:resources",
++    "//content/browser/webrtc/resources",
++  ]
++
++  if (enable_vr) {
++    public_deps += [ "//content/browser/resources/webxr_internals:resources" ]
++  }
++
++  if (is_android) {
++    public_deps += [
++      "//chrome/browser/resources/feed_internals:resources",
++      "//chrome/browser/resources/notifications_internals:resources",
++      "//chrome/browser/resources/webapks:resources",
++    ]
++  } else {
++    public_deps += [
++      "actor_internals:resources",
++      "color_pipeline_internals:resources",
++      "infobar_internals:resources",
++      "media_router/internals:resources",
++      "on_device_internals:resources",
++      "user_education_internals:resources",
++      "webui_js_error:resources",
++    ]
++  }
++
++  if (is_android || is_linux || is_chromeos || is_win) {
++    public_deps += [ "//chrome/browser/resources/sandbox_internals:resources" ]
++  }
++
++  if (enable_session_service) {
++    public_deps += [ "tab_strip_internals:resources" ]
++  }
++
++  if (enable_devtools_frontend) {
++    public_deps += [ "//content/browser/devtools:devtools_resources" ]
++  }
++}
++
++repack("dev_ui_paks") {
++  output = "$root_gen_dir/chrome/dev_ui_resources.pak"
++
++  sources = [
++    "$root_gen_dir/chrome/accessibility_resources.pak",
++    "$root_gen_dir/chrome/bluetooth_internals_resources.pak",
++    "$root_gen_dir/chrome/browsing_topics_internals_resources.pak",
++    "$root_gen_dir/chrome/components_resources.pak",
++    "$root_gen_dir/chrome/device_log_resources.pak",
++    "$root_gen_dir/chrome/engagement_resources.pak",
++    "$root_gen_dir/chrome/family_link_user_internals_resources.pak",
++    "$root_gen_dir/chrome/location_internals_resources.pak",
++    "$root_gen_dir/chrome/media_resources.pak",
++    "$root_gen_dir/chrome/memory_internals_resources.pak",
++    "$root_gen_dir/chrome/net_internals_resources.pak",
++    "$root_gen_dir/chrome/omnibox_resources.pak",
++    "$root_gen_dir/chrome/predictors_resources.pak",
++    "$root_gen_dir/chrome/privacy_sandbox_internals_resources.pak",
++    "$root_gen_dir/chrome/usb_internals_resources.pak",
++    "$root_gen_dir/components/commerce_internals_resources.pak",
++    "$root_gen_dir/components/data_sharing_internals_resources.pak",
++    "$root_gen_dir/components/dev_ui_components_resources.pak",
++    "$root_gen_dir/components/download_internals_resources.pak",
++    "$root_gen_dir/components/history_clusters_internals_resources.pak",
++    "$root_gen_dir/components/metrics_internals_resources.pak",
++    "$root_gen_dir/components/ntp_tiles_internals_resources.pak",
++    "$root_gen_dir/components/optimization_guide_internals_resources.pak",
++    "$root_gen_dir/components/policy_resources.pak",
++    "$root_gen_dir/components/signin_internals_resources.pak",
++    "$root_gen_dir/components/sync_service_sync_internals_resources.pak",
++    "$root_gen_dir/components/ukm_resources.pak",
++    "$root_gen_dir/content/browser/resources/media/media_internals_resources.pak",
++    "$root_gen_dir/content/browser/webrtc/resources/webrtc_internals_resources.pak",
++    "$root_gen_dir/content/gpu_resources.pak",
++    "$root_gen_dir/content/network_errors_resources.pak",
++    "$root_gen_dir/content/process_resources.pak",
++    "$root_gen_dir/content/service_worker_resources.pak",
++  ]
++
++  if (enable_vr) {
++    sources += [ "$root_gen_dir/content/webxr_internals_resources.pak" ]
++  }
++
++  if (is_android) {
++    sources += [
++      "$root_gen_dir/chrome/feed_internals_resources.pak",
++      "$root_gen_dir/chrome/notifications_internals_resources.pak",
++      "$root_gen_dir/chrome/webapks_resources.pak",
++    ]
++  } else {
++    sources += [
++      "$root_gen_dir/chrome/actor_internals_resources.pak",
++      "$root_gen_dir/chrome/color_pipeline_internals_resources.pak",
++      "$root_gen_dir/chrome/infobar_internals_resources.pak",
++      "$root_gen_dir/chrome/media_router_internals_resources.pak",
++      "$root_gen_dir/chrome/on_device_internals_resources.pak",
++      "$root_gen_dir/chrome/user_education_internals_resources.pak",
++      "$root_gen_dir/chrome/webui_js_error_resources.pak",
++    ]
++  }
++
++  if (is_android || is_linux || is_chromeos || is_win) {
++    sources += [ "$root_gen_dir/chrome/sandbox_internals_resources.pak" ]
++  }
++
++  if (enable_session_service) {
++    sources += [ "$root_gen_dir/chrome/tab_strip_internals_resources.pak" ]
++  }
++
++  if (enable_devtools_frontend) {
++    sources +=
++        [ "$root_gen_dir/content/browser/devtools/devtools_resources.pak" ]
++  }
++
++  deps = [ ":dev_ui_resources" ]
++}
+diff --git a/build/src/chrome/browser/resources/basedev_code/BUILD.gn b/build/src/chrome/browser/resources/basedev_code/BUILD.gn
+new file mode 100644
+index 0000000..259ac4d
+--- /dev/null
++++ b/build/src/chrome/browser/resources/basedev_code/BUILD.gn
+@@ -0,0 +1,21 @@
++# Copyright 2025 The Base Dev Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//chrome/common/features.gni")
++import("//tools/grit/grit_rule.gni")
++
++assert(!is_android)
++
++grit("resources") {
++  source = "basedev_code_resources.grd"
++
++  outputs = [
++    "grit/basedev_code_resources.h",
++    "grit/basedev_code_resources_map.cc",
++    "grit/basedev_code_resources_map.h",
++    "basedev_code_resources.pak",
++  ]
++
++  output_dir = "$root_gen_dir/chrome"
++}
+diff --git a/build/src/chrome/browser/resources/basedev_code/basedev_code_resources.grd b/build/src/chrome/browser/resources/basedev_code/basedev_code_resources.grd
+new file mode 100644
+index 0000000..e9ab56e
+--- /dev/null
++++ b/build/src/chrome/browser/resources/basedev_code/basedev_code_resources.grd
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<grit latest_public_release="0" current_release="1" output_all_resource_defines="false">
++  <outputs>
++    <output filename="grit/basedev_code_resources.h" type="rc_header">
++      <emit emit_type='prepend'></emit>
++    </output>
++    <output filename="grit/basedev_code_resources_map.cc" type="resource_file_map_source" />
++    <output filename="grit/basedev_code_resources_map.h" type="resource_map_header" />
++    <output filename="basedev_code_resources.pak" type="data_package" />
++  </outputs>
++  <release seq="1">
++    <includes>
++      <include name="IDR_BASEDEV_CODE_INDEX_HTML" file="index.html" type="BINDATA" />
++      <include name="IDR_BASEDEV_CODE_EDITOR_CSS" file="editor.css" type="BINDATA" />
++      <include name="IDR_BASEDEV_CODE_EDITOR_JS" file="editor.js" type="BINDATA" />
++    </includes>
++  </release>
++</grit>
+diff --git a/build/src/chrome/browser/resources/basedev_code/editor.css b/build/src/chrome/browser/resources/basedev_code/editor.css
+new file mode 100644
+index 0000000..066dfe0
+--- /dev/null
++++ b/build/src/chrome/browser/resources/basedev_code/editor.css
+@@ -0,0 +1,448 @@
++/* Base Code Editor Styles */
++
++* {
++  margin: 0;
++  padding: 0;
++  box-sizing: border-box;
++}
++
++:root {
++  --bg-primary: #1e1e1e;
++  --bg-secondary: #252526;
++  --bg-tertiary: #2d2d30;
++  --bg-hover: #2a2d2e;
++  --border-color: #3e3e42;
++  --text-primary: #cccccc;
++  --text-secondary: #969696;
++  --accent-color: #007acc;
++  --accent-hover: #1a86d6;
++  --success-color: #4ec9b0;
++  --warning-color: #ce9178;
++  --error-color: #f48771;
++  --sidebar-width: 250px;
++  --terminal-height: 200px;
++  --tab-height: 35px;
++}
++
++body {
++  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
++  font-size: 13px;
++  color: var(--text-primary);
++  background: var(--bg-primary);
++  overflow: hidden;
++}
++
++#app {
++  display: flex;
++  height: 100vh;
++  width: 100vw;
++}
++
++/* Sidebar */
++#sidebar {
++  width: var(--sidebar-width);
++  background: var(--bg-secondary);
++  border-right: 1px solid var(--border-color);
++  display: flex;
++  flex-direction: column;
++  overflow: hidden;
++}
++
++.sidebar-header {
++  padding: 12px 16px;
++  border-bottom: 1px solid var(--border-color);
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++}
++
++.sidebar-header h3 {
++  font-size: 11px;
++  font-weight: 600;
++  text-transform: uppercase;
++  letter-spacing: 0.5px;
++  color: var(--text-secondary);
++}
++
++.toolbar {
++  display: flex;
++  gap: 4px;
++}
++
++.icon-btn {
++  background: transparent;
++  border: none;
++  color: var(--text-secondary);
++  cursor: pointer;
++  padding: 4px;
++  border-radius: 3px;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  transition: background 0.2s, color 0.2s;
++}
++
++.icon-btn:hover {
++  background: var(--bg-hover);
++  color: var(--text-primary);
++}
++
++.icon-btn:active {
++  background: var(--bg-tertiary);
++}
++
++.file-tree {
++  flex: 1;
++  overflow-y: auto;
++  padding: 8px 0;
++}
++
++.file-tree::-webkit-scrollbar {
++  width: 10px;
++}
++
++.file-tree::-webkit-scrollbar-track {
++  background: transparent;
++}
++
++.file-tree::-webkit-scrollbar-thumb {
++  background: var(--bg-tertiary);
++  border-radius: 5px;
++}
++
++.file-tree::-webkit-scrollbar-thumb:hover {
++  background: var(--border-color);
++}
++
++.empty-state {
++  padding: 20px;
++  text-align: center;
++  color: var(--text-secondary);
++}
++
++.empty-state p {
++  margin-bottom: 12px;
++}
++
++.empty-state button {
++  background: var(--accent-color);
++  color: white;
++  border: none;
++  padding: 8px 16px;
++  border-radius: 4px;
++  cursor: pointer;
++  font-size: 13px;
++  transition: background 0.2s;
++}
++
++.empty-state button:hover {
++  background: var(--accent-hover);
++}
++
++.file-item,
++.folder-item {
++  padding: 4px 16px;
++  cursor: pointer;
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  transition: background 0.2s;
++  user-select: none;
++}
++
++.file-item:hover,
++.folder-item:hover {
++  background: var(--bg-hover);
++}
++
++.file-item.active {
++  background: var(--bg-tertiary);
++  color: white;
++}
++
++.folder-item {
++  font-weight: 500;
++}
++
++.folder-icon,
++.file-icon {
++  width: 16px;
++  height: 16px;
++  flex-shrink: 0;
++}
++
++/* Main Area */
++#main {
++  flex: 1;
++  display: flex;
++  flex-direction: column;
++  overflow: hidden;
++}
++
++/* Tabs */
++.tab-bar {
++  height: var(--tab-height);
++  background: var(--bg-secondary);
++  border-bottom: 1px solid var(--border-color);
++  display: flex;
++  overflow-x: auto;
++  overflow-y: hidden;
++}
++
++.tab-bar::-webkit-scrollbar {
++  height: 0;
++}
++
++.tab {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  padding: 0 12px;
++  min-width: 120px;
++  max-width: 200px;
++  border-right: 1px solid var(--border-color);
++  cursor: pointer;
++  transition: background 0.2s;
++  white-space: nowrap;
++  overflow: hidden;
++}
++
++.tab:hover {
++  background: var(--bg-hover);
++}
++
++.tab.active {
++  background: var(--bg-primary);
++}
++
++.tab-label {
++  flex: 1;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.tab-close {
++  opacity: 0;
++  transition: opacity 0.2s;
++}
++
++.tab:hover .tab-close,
++.tab.active .tab-close {
++  opacity: 1;
++}
++
++.tab-close:hover {
++  color: white;
++}
++
++/* Editor Container */
++.editor-container {
++  flex: 1;
++  overflow: hidden;
++  position: relative;
++}
++
++#editor {
++  width: 100%;
++  height: 100%;
++}
++
++/* Welcome Screen */
++.welcome-screen {
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  height: 100%;
++  padding: 40px;
++  text-align: center;
++}
++
++.welcome-screen h1 {
++  font-size: 36px;
++  font-weight: 300;
++  margin-bottom: 12px;
++  color: var(--text-primary);
++}
++
++.welcome-screen p {
++  font-size: 16px;
++  color: var(--text-secondary);
++  margin-bottom: 32px;
++}
++
++.quick-actions {
++  display: flex;
++  gap: 12px;
++  margin-bottom: 48px;
++}
++
++.primary-btn {
++  background: var(--accent-color);
++  color: white;
++  border: none;
++  padding: 12px 24px;
++  border-radius: 4px;
++  cursor: pointer;
++  font-size: 14px;
++  font-weight: 500;
++  transition: background 0.2s;
++}
++
++.primary-btn:hover {
++  background: var(--accent-hover);
++}
++
++.secondary-btn {
++  background: transparent;
++  color: var(--accent-color);
++  border: 1px solid var(--accent-color);
++  padding: 12px 24px;
++  border-radius: 4px;
++  cursor: pointer;
++  font-size: 14px;
++  font-weight: 500;
++  transition: background 0.2s, color 0.2s;
++}
++
++.secondary-btn:hover {
++  background: var(--accent-color);
++  color: white;
++}
++
++.features {
++  max-width: 500px;
++  text-align: left;
++}
++
++.features h3 {
++  font-size: 18px;
++  margin-bottom: 16px;
++  color: var(--text-primary);
++}
++
++.features ul {
++  list-style: none;
++}
++
++.features li {
++  padding: 8px 0;
++  color: var(--text-secondary);
++  display: flex;
++  align-items: center;
++  gap: 8px;
++}
++
++.features li:before {
++  content: '✓';
++  color: var(--success-color);
++  font-weight: bold;
++}
++
++/* Terminal */
++.terminal {
++  height: var(--terminal-height);
++  background: var(--bg-secondary);
++  border-top: 1px solid var(--border-color);
++  display: flex;
++  flex-direction: column;
++  transition: height 0.3s;
++}
++
++.terminal.hidden {
++  height: 0;
++  border-top: none;
++  overflow: hidden;
++}
++
++.terminal.minimized {
++  height: 35px;
++}
++
++.terminal-header {
++  padding: 8px 12px;
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  border-bottom: 1px solid var(--border-color);
++}
++
++.terminal-title {
++  font-weight: 500;
++  font-size: 12px;
++  text-transform: uppercase;
++  letter-spacing: 0.5px;
++  color: var(--text-secondary);
++}
++
++.terminal-actions {
++  display: flex;
++  gap: 4px;
++}
++
++.terminal-output {
++  flex: 1;
++  overflow-y: auto;
++  padding: 8px 12px;
++  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
++  font-size: 12px;
++  line-height: 1.5;
++}
++
++.terminal-output::-webkit-scrollbar {
++  width: 10px;
++}
++
++.terminal-output::-webkit-scrollbar-track {
++  background: transparent;
++}
++
++.terminal-output::-webkit-scrollbar-thumb {
++  background: var(--bg-tertiary);
++  border-radius: 5px;
++}
++
++.terminal-line {
++  margin: 2px 0;
++}
++
++.terminal-error {
++  color: var(--error-color);
++}
++
++.terminal-success {
++  color: var(--success-color);
++}
++
++.terminal-input-line {
++  display: flex;
++  align-items: center;
++  padding: 8px 12px;
++  border-top: 1px solid var(--border-color);
++}
++
++.prompt {
++  color: var(--success-color);
++  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
++  margin-right: 8px;
++  font-weight: bold;
++}
++
++#terminalInput {
++  flex: 1;
++  background: transparent;
++  border: none;
++  color: var(--text-primary);
++  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
++  font-size: 12px;
++  outline: none;
++}
++
++#terminalInput::placeholder {
++  color: var(--text-secondary);
++}
++
++/* Utility Classes */
++.hidden {
++  display: none !important;
++}
+diff --git a/build/src/chrome/browser/resources/basedev_code/editor.js b/build/src/chrome/browser/resources/basedev_code/editor.js
+new file mode 100644
+index 0000000..a24e29b
+--- /dev/null
++++ b/build/src/chrome/browser/resources/basedev_code/editor.js
+@@ -0,0 +1,552 @@
++// Base Code Editor - Main JavaScript
++
++class CodeEditor {
++  constructor() {
++    this.editor = null;
++    this.currentFile = null;
++    this.openTabs = [];
++    this.fileTree = [];
++    this.currentFolder = null;
++    this.terminalHistory = [];
++    this.historyIndex = -1;
++
++    this.init();
++  }
++
++  init() {
++    this.initMonaco();
++    this.bindEvents();
++    this.showTerminal();
++  }
++
++  initMonaco() {
++    // Load Monaco Editor from CDN
++    require.config({
++      paths: {
++        'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs'
++      }
++    });
++
++    require(['vs/editor/editor.main'], () => {
++      console.log('Monaco Editor loaded successfully');
++      this.createEditor();
++    });
++  }
++
++  createEditor(content = '', language = 'plaintext') {
++    const container = document.getElementById('editorContainer');
++
++    // Clear welcome screen if present
++    const welcomeScreen = container.querySelector('.welcome-screen');
++    if (welcomeScreen) {
++      welcomeScreen.remove();
++    }
++
++    // Create editor div if it doesn't exist
++    let editorDiv = document.getElementById('editor');
++    if (!editorDiv) {
++      editorDiv = document.createElement('div');
++      editorDiv.id = 'editor';
++      container.appendChild(editorDiv);
++    }
++
++    if (this.editor) {
++      this.editor.dispose();
++    }
++
++    this.editor = monaco.editor.create(editorDiv, {
++      value: content,
++      language: language,
++      theme: 'vs-dark',
++      automaticLayout: true,
++      fontSize: 13,
++      lineNumbers: 'on',
++      minimap: { enabled: true },
++      scrollBeyondLastLine: false,
++      wordWrap: 'off',
++      tabSize: 2,
++      insertSpaces: true,
++      renderWhitespace: 'selection',
++      folding: true,
++      lineDecorationsWidth: 10,
++      lineNumbersMinChars: 3
++    });
++
++    // Handle content changes
++    this.editor.onDidChangeModelContent(() => {
++      if (this.currentFile) {
++        this.markTabAsDirty(this.currentFile);
++      }
++    });
++  }
++
++  bindEvents() {
++    // Open folder buttons
++    document.getElementById('openFolder')?.addEventListener('click', () => this.openFolder());
++    document.getElementById('openFolderEmpty')?.addEventListener('click', () => this.openFolder());
++    document.getElementById('openFolderWelcome')?.addEventListener('click', () => this.openFolder());
++
++    // New file/folder buttons
++    document.getElementById('newFile')?.addEventListener('click', () => this.createNewFile());
++    document.getElementById('newFileWelcome')?.addEventListener('click', () => this.createNewFile());
++    document.getElementById('newFolder')?.addEventListener('click', () => this.createNewFolder());
++
++    // Terminal controls
++    document.getElementById('clearTerminal')?.addEventListener('click', () => this.clearTerminal());
++    document.getElementById('minimizeTerminal')?.addEventListener('click', () => this.toggleTerminal());
++
++    // Terminal input
++    const terminalInput = document.getElementById('terminalInput');
++    if (terminalInput) {
++      terminalInput.addEventListener('keydown', (e) => this.handleTerminalInput(e));
++    }
++
++    // Keyboard shortcuts
++    document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
++  }
++
++  async openFolder() {
++    try {
++      // Use File System Access API
++      const dirHandle = await window.showDirectoryPicker();
++      this.currentFolder = dirHandle;
++      await this.loadFolderContents(dirHandle);
++      this.log(`Opened folder: ${dirHandle.name}`, 'success');
++    } catch (err) {
++      if (err.name !== 'AbortError') {
++        this.log(`Error opening folder: ${err.message}`, 'error');
++      }
++    }
++  }
++
++  async loadFolderContents(dirHandle, parentElement = null) {
++    const fileTreeContainer = document.getElementById('fileTree');
++
++    if (!parentElement) {
++      // Clear the file tree
++      fileTreeContainer.innerHTML = '';
++    }
++
++    const entries = [];
++    for await (const entry of dirHandle.values()) {
++      entries.push(entry);
++    }
++
++    // Sort: folders first, then files
++    entries.sort((a, b) => {
++      if (a.kind === b.kind) {
++        return a.name.localeCompare(b.name);
++      }
++      return a.kind === 'directory' ? -1 : 1;
++    });
++
++    const container = parentElement || fileTreeContainer;
++
++    for (const entry of entries) {
++      if (entry.kind === 'directory') {
++        const folderItem = this.createFolderElement(entry);
++        container.appendChild(folderItem);
++      } else {
++        const fileItem = this.createFileElement(entry);
++        container.appendChild(fileItem);
++      }
++    }
++  }
++
++  createFolderElement(dirHandle) {
++    const div = document.createElement('div');
++    div.className = 'folder-item';
++    div.innerHTML = `
++      <svg class="folder-icon" viewBox="0 0 16 16">
++        <path fill="currentColor" d="M14.5 2H7.71l-.85-.85L6.51 1h-5l-.5.5v11l.5.5h13l.5-.5v-10L14.5 2zm-.51 8.49V13h-12V2h4.49l.35.15.86.86H14v6.49z"/>
++      </svg>
++      <span>${dirHandle.name}</span>
++    `;
++
++    div.addEventListener('click', async (e) => {
++      e.stopPropagation();
++      // TODO: Expand/collapse folder
++      this.log(`Folder: ${dirHandle.name}`, 'success');
++    });
++
++    return div;
++  }
++
++  createFileElement(fileHandle) {
++    const div = document.createElement('div');
++    div.className = 'file-item';
++    const icon = this.getFileIcon(fileHandle.name);
++    div.innerHTML = `
++      ${icon}
++      <span>${fileHandle.name}</span>
++    `;
++
++    div.addEventListener('click', async (e) => {
++      e.stopPropagation();
++      await this.openFile(fileHandle);
++    });
++
++    return div;
++  }
++
++  async openFile(fileHandle) {
++    try {
++      const file = await fileHandle.getFile();
++      const content = await file.text();
++      const language = this.getLanguageFromFilename(file.name);
++
++      // Create editor if it doesn't exist
++      if (!this.editor) {
++        this.createEditor(content, language);
++      } else {
++        this.editor.setValue(content);
++        monaco.editor.setModelLanguage(this.editor.getModel(), language);
++      }
++
++      this.currentFile = {
++        handle: fileHandle,
++        name: file.name,
++        content: content,
++        dirty: false
++      };
++
++      this.addTab(file.name);
++      this.log(`Opened: ${file.name}`, 'success');
++    } catch (err) {
++      this.log(`Error opening file: ${err.message}`, 'error');
++    }
++  }
++
++  addTab(filename) {
++    const tabBar = document.getElementById('tabs');
++
++    // Check if tab already exists
++    const existingTab = Array.from(tabBar.children).find(
++      tab => tab.dataset.filename === filename
++    );
++
++    if (existingTab) {
++      this.activateTab(existingTab);
++      return;
++    }
++
++    const tab = document.createElement('div');
++    tab.className = 'tab active';
++    tab.dataset.filename = filename;
++    tab.innerHTML = `
++      <span class="tab-label">${filename}</span>
++      <span class="tab-close">×</span>
++    `;
++
++    // Deactivate other tabs
++    Array.from(tabBar.children).forEach(t => t.classList.remove('active'));
++
++    tab.querySelector('.tab-close').addEventListener('click', (e) => {
++      e.stopPropagation();
++      this.closeTab(tab);
++    });
++
++    tab.addEventListener('click', () => this.activateTab(tab));
++
++    tabBar.appendChild(tab);
++    this.openTabs.push({ filename, element: tab });
++  }
++
++  activateTab(tab) {
++    const tabBar = document.getElementById('tabs');
++    Array.from(tabBar.children).forEach(t => t.classList.remove('active'));
++    tab.classList.add('active');
++    // TODO: Load file content when switching tabs
++  }
++
++  closeTab(tab) {
++    const filename = tab.dataset.filename;
++    this.openTabs = this.openTabs.filter(t => t.filename !== filename);
++    tab.remove();
++
++    if (this.openTabs.length === 0) {
++      // Show welcome screen again
++      this.showWelcomeScreen();
++    }
++  }
++
++  markTabAsDirty(file) {
++    const tab = this.openTabs.find(t => t.filename === file.name);
++    if (tab && !tab.dirty) {
++      tab.element.querySelector('.tab-label').textContent = `${file.name} •`;
++      tab.dirty = true;
++    }
++  }
++
++  async saveCurrentFile() {
++    if (!this.currentFile || !this.editor) {
++      this.log('No file to save', 'error');
++      return;
++    }
++
++    try {
++      const content = this.editor.getValue();
++      const writable = await this.currentFile.handle.createWritable();
++      await writable.write(content);
++      await writable.close();
++
++      this.currentFile.dirty = false;
++      this.log(`Saved: ${this.currentFile.name}`, 'success');
++
++      // Update tab
++      const tab = this.openTabs.find(t => t.filename === this.currentFile.name);
++      if (tab) {
++        tab.element.querySelector('.tab-label').textContent = this.currentFile.name;
++        tab.dirty = false;
++      }
++    } catch (err) {
++      this.log(`Error saving file: ${err.message}`, 'error');
++    }
++  }
++
++  createNewFile() {
++    const filename = prompt('Enter filename:');
++    if (!filename) return;
++
++    if (!this.editor) {
++      this.createEditor('', this.getLanguageFromFilename(filename));
++    } else {
++      this.editor.setValue('');
++    }
++
++    this.currentFile = {
++      handle: null,
++      name: filename,
++      content: '',
++      dirty: true
++    };
++
++    this.addTab(filename);
++    this.log(`Created: ${filename}`, 'success');
++  }
++
++  createNewFolder() {
++    this.log('Create new folder - coming soon', 'success');
++  }
++
++  showWelcomeScreen() {
++    const container = document.getElementById('editorContainer');
++    const editorDiv = document.getElementById('editor');
++    if (editorDiv) {
++      editorDiv.remove();
++    }
++    if (this.editor) {
++      this.editor.dispose();
++      this.editor = null;
++    }
++
++    container.innerHTML = `
++      <div class="welcome-screen">
++        <h1>Base Code Editor</h1>
++        <p>A powerful code editor built into Base Browser</p>
++        <div class="quick-actions">
++          <button id="openFolderWelcome" class="primary-btn">Open Folder</button>
++          <button id="newFileWelcome" class="secondary-btn">New File</button>
++        </div>
++        <div class="features">
++          <h3>Features</h3>
++          <ul>
++            <li>Syntax highlighting for 100+ languages</li>
++            <li>Integrated file explorer</li>
++            <li>Built-in terminal</li>
++            <li>Multi-tab editing</li>
++            <li>Real-time file watching</li>
++          </ul>
++        </div>
++      </div>
++    `;
++
++    // Re-bind events for welcome screen buttons
++    this.bindEvents();
++  }
++
++  // Terminal functions
++  showTerminal() {
++    const terminal = document.getElementById('terminal');
++    terminal.classList.remove('hidden');
++    this.log('Terminal ready. Type "help" for available commands.', 'success');
++  }
++
++  toggleTerminal() {
++    const terminal = document.getElementById('terminal');
++    terminal.classList.toggle('minimized');
++  }
++
++  clearTerminal() {
++    const output = document.getElementById('terminalOutput');
++    output.innerHTML = '';
++  }
++
++  handleTerminalInput(e) {
++    if (e.key === 'Enter') {
++      const input = e.target.value.trim();
++      if (input) {
++        this.executeCommand(input);
++        this.terminalHistory.push(input);
++        this.historyIndex = this.terminalHistory.length;
++        e.target.value = '';
++      }
++    } else if (e.key === 'ArrowUp') {
++      e.preventDefault();
++      if (this.historyIndex > 0) {
++        this.historyIndex--;
++        e.target.value = this.terminalHistory[this.historyIndex];
++      }
++    } else if (e.key === 'ArrowDown') {
++      e.preventDefault();
++      if (this.historyIndex < this.terminalHistory.length - 1) {
++        this.historyIndex++;
++        e.target.value = this.terminalHistory[this.historyIndex];
++      } else {
++        this.historyIndex = this.terminalHistory.length;
++        e.target.value = '';
++      }
++    }
++  }
++
++  executeCommand(cmd) {
++    this.log(`$ ${cmd}`);
++
++    const parts = cmd.split(' ');
++    const command = parts[0];
++
++    switch (command) {
++      case 'help':
++        this.log('Available commands:', 'success');
++        this.log('  help     - Show this help message');
++        this.log('  clear    - Clear terminal');
++        this.log('  ls       - List files (simulated)');
++        this.log('  pwd      - Print working directory');
++        this.log('  echo     - Echo text');
++        break;
++
++      case 'clear':
++        this.clearTerminal();
++        break;
++
++      case 'ls':
++        if (this.currentFolder) {
++          this.log('Files in current folder:', 'success');
++          this.log('(Feature coming soon - will show actual files)');
++        } else {
++          this.log('No folder opened', 'error');
++        }
++        break;
++
++      case 'pwd':
++        if (this.currentFolder) {
++          this.log(this.currentFolder.name, 'success');
++        } else {
++          this.log('No folder opened', 'error');
++        }
++        break;
++
++      case 'echo':
++        this.log(parts.slice(1).join(' '), 'success');
++        break;
++
++      default:
++        this.log(`Command not found: ${command}`, 'error');
++        this.log('Type "help" for available commands');
++    }
++  }
++
++  log(message, type = 'info') {
++    const output = document.getElementById('terminalOutput');
++    const line = document.createElement('div');
++    line.className = `terminal-line ${type === 'error' ? 'terminal-error' : ''} ${type === 'success' ? 'terminal-success' : ''}`;
++    line.textContent = message;
++    output.appendChild(line);
++    output.scrollTop = output.scrollHeight;
++  }
++
++  handleKeyboardShortcuts(e) {
++    // Cmd/Ctrl + S: Save
++    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
++      e.preventDefault();
++      this.saveCurrentFile();
++    }
++
++    // Cmd/Ctrl + O: Open folder
++    if ((e.metaKey || e.ctrlKey) && e.key === 'o') {
++      e.preventDefault();
++      this.openFolder();
++    }
++
++    // Cmd/Ctrl + N: New file
++    if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
++      e.preventDefault();
++      this.createNewFile();
++    }
++
++    // Cmd/Ctrl + `: Toggle terminal
++    if ((e.metaKey || e.ctrlKey) && e.key === '`') {
++      e.preventDefault();
++      this.toggleTerminal();
++    }
++  }
++
++  getLanguageFromFilename(filename) {
++    const ext = filename.split('.').pop().toLowerCase();
++    const languageMap = {
++      'js': 'javascript',
++      'jsx': 'javascript',
++      'ts': 'typescript',
++      'tsx': 'typescript',
++      'py': 'python',
++      'rb': 'ruby',
++      'java': 'java',
++      'cpp': 'cpp',
++      'c': 'c',
++      'h': 'cpp',
++      'hpp': 'cpp',
++      'cs': 'csharp',
++      'go': 'go',
++      'rs': 'rust',
++      'php': 'php',
++      'html': 'html',
++      'htm': 'html',
++      'css': 'css',
++      'scss': 'scss',
++      'sass': 'sass',
++      'less': 'less',
++      'json': 'json',
++      'xml': 'xml',
++      'yaml': 'yaml',
++      'yml': 'yaml',
++      'md': 'markdown',
++      'sql': 'sql',
++      'sh': 'shell',
++      'bash': 'shell',
++      'zsh': 'shell',
++      'ps1': 'powershell',
++      'vue': 'vue',
++      'svelte': 'svelte'
++    };
++
++    return languageMap[ext] || 'plaintext';
++  }
++
++  getFileIcon(filename) {
++    // Simple file icon based on extension
++    return `
++      <svg class="file-icon" viewBox="0 0 16 16">
++        <path fill="currentColor" d="M13.5 0h-12l-.5.5v15l.5.5h12l.5-.5v-15l-.5-.5zM13 15H2V1h11v14z"/>
++      </svg>
++    `;
++  }
++}
++
++// Initialize the editor when DOM is ready
++if (document.readyState === 'loading') {
++  document.addEventListener('DOMContentLoaded', () => {
++    window.codeEditor = new CodeEditor();
++  });
++} else {
++  window.codeEditor = new CodeEditor();
++}
+diff --git a/build/src/chrome/browser/resources/basedev_code/index.html b/build/src/chrome/browser/resources/basedev_code/index.html
+new file mode 100644
+index 0000000..b888081
+--- /dev/null
++++ b/build/src/chrome/browser/resources/basedev_code/index.html
+@@ -0,0 +1,91 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Base Code Editor</title>
++  <link rel="stylesheet" href="editor.css">
++</head>
++<body>
++  <div id="app">
++    <div id="sidebar">
++      <div class="sidebar-header">
++        <h3>Explorer</h3>
++        <div class="toolbar">
++          <button id="openFolder" class="icon-btn" title="Open Folder">
++            <svg width="16" height="16" viewBox="0 0 16 16">
++              <path fill="currentColor" d="M14.5 2H7.71l-.85-.85L6.51 1h-5l-.5.5v11l.5.5h13l.5-.5v-10L14.5 2zm-.51 8.49V13h-12V2h4.49l.35.15.86.86H14v6.49z"/>
++            </svg>
++          </button>
++          <button id="newFile" class="icon-btn" title="New File">
++            <svg width="16" height="16" viewBox="0 0 16 16">
++              <path fill="currentColor" d="M9.5 1.1l3.4 3.5.1.4v2h-1V6H8V2H3v11h4v1H2.5l-.5-.5v-12l.5-.5h6.7l.3.1zM9 2v3h2.9L9 2zm4 14h-1v-3H9v-1h3V9h1v3h3v1h-3v3z"/>
++            </svg>
++          </button>
++          <button id="newFolder" class="icon-btn" title="New Folder">
++            <svg width="16" height="16" viewBox="0 0 16 16">
++              <path fill="currentColor" d="M14.5 2H7.71l-.85-.85L6.51 1h-5l-.5.5v11l.5.5h13l.5-.5v-10L14.5 2zm-.51 8.49V13h-12V2h4.49l.35.15.86.86H14v6.49h-2v1h2zm-3 2.51h-1v-2H8v-1h2V9h1v2h2v1h-2v2z"/>
++            </svg>
++          </button>
++        </div>
++      </div>
++      <div id="fileTree" class="file-tree">
++        <div class="empty-state">
++          <p>No folder opened</p>
++          <button id="openFolderEmpty">Open Folder</button>
++        </div>
++      </div>
++    </div>
++
++    <div id="main">
++      <div id="tabs" class="tab-bar"></div>
++      <div id="editorContainer" class="editor-container">
++        <div class="welcome-screen">
++          <h1>Base Code Editor</h1>
++          <p>A powerful code editor built into Base Browser</p>
++          <div class="quick-actions">
++            <button id="openFolderWelcome" class="primary-btn">Open Folder</button>
++            <button id="newFileWelcome" class="secondary-btn">New File</button>
++          </div>
++          <div class="features">
++            <h3>Features</h3>
++            <ul>
++              <li>Syntax highlighting for 100+ languages</li>
++              <li>Integrated file explorer</li>
++              <li>Built-in terminal</li>
++              <li>Multi-tab editing</li>
++              <li>Real-time file watching</li>
++            </ul>
++          </div>
++        </div>
++      </div>
++
++      <div id="terminal" class="terminal hidden">
++        <div class="terminal-header">
++          <span class="terminal-title">Terminal</span>
++          <div class="terminal-actions">
++            <button id="clearTerminal" class="icon-btn" title="Clear">
++              <svg width="16" height="16" viewBox="0 0 16 16">
++                <path fill="currentColor" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 1a6 6 0 1 0 0 12A6 6 0 0 0 8 2zm3.5 4.5L10 5 8 7 6 5 4.5 6.5 6.5 8.5 4.5 10.5 6 12l2-2 2 2 1.5-1.5-2-2 2-2z"/>
++              </svg>
++            </button>
++            <button id="minimizeTerminal" class="icon-btn" title="Minimize">
++              <svg width="16" height="16" viewBox="0 0 16 16">
++                <path fill="currentColor" d="M14 8v1H3V8h11z"/>
++              </svg>
++            </button>
++          </div>
++        </div>
++        <div id="terminalOutput" class="terminal-output"></div>
++        <div class="terminal-input-line">
++          <span class="prompt">$ </span>
++          <input type="text" id="terminalInput" placeholder="Type command..." autocomplete="off">
++        </div>
++      </div>
++    </div>
++  </div>
++
++  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
++  <script src="editor.js"></script>
++</body>
++</html>
+diff --git a/build/src/chrome/browser/ui/webui/BUILD.gn b/build/src/chrome/browser/ui/webui/BUILD.gn
+new file mode 100644
+index 0000000..3d5a80b
+--- /dev/null
++++ b/build/src/chrome/browser/ui/webui/BUILD.gn
+@@ -0,0 +1,163 @@
++# Copyright 2022 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//chrome/common/features.gni")
++import("//chromeos/dbus/config/use_real_dbus_clients.gni")
++import("//components/enterprise/buildflags/buildflags.gni")
++import("//components/safe_browsing/buildflags.gni")
++import("//components/signin/features.gni")
++import("//extensions/buildflags/buildflags.gni")
++import("//tools/metrics/generate_allowlist_from_histograms_file.gni")
++
++generate_allowlist_from_histograms_file("webui_url_hashes") {
++  namespace = "webui_metrics"
++  input_xml_file = "//tools/metrics/histograms/metadata/ui/enums.xml"
++  tag = "enum"
++  output_file = "webui_url_hashes.h"
++  allow_list_name = "WebUIUrlHashes"
++}
++
++source_set("configs") {
++  sources = [
++    "chrome_untrusted_web_ui_configs.cc",
++    "chrome_untrusted_web_ui_configs.h",
++    "chrome_web_ui_configs.cc",
++    "chrome_web_ui_configs.h",
++  ]
++
++  configs += [ "//build/config/compiler:wexit_time_destructors" ]
++
++  if (!is_android) {
++    public_deps = [
++      "//chrome/browser/contextual_tasks:ui",
++      "//chrome/browser/ui/tabs/tab_group_home",
++      "//chrome/browser/ui/webui/commerce",
++    ]
++  }
++
++  deps = [
++    ":webui",
++    "//chrome/browser/optimization_guide",
++    "//chrome/browser/ui",
++    "//chrome/browser/ui/webui/about",
++    "//chrome/browser/ui/webui/accessibility",
++    "//chrome/browser/ui/webui/autofill_and_password_manager_internals",
++    "//chrome/browser/ui/webui/internal_debug_pages_disabled",
++    "//components/compose:buildflags",
++    "//components/lens:buildflags",
++    "//components/security_interstitials/content:security_interstitial_page",
++    "//content/public/browser",
++    "//extensions/buildflags",
++    "//printing/buildflags",
++    "//skia",
++    "//third_party/abseil-cpp:absl",
++  ]
++
++  if (!is_android) {
++    deps += [
++      "//chrome/browser/actor/ui",
++      "//chrome/browser/ui/webui/access_code_cast",
++      "//chrome/browser/ui/webui/actor_internals",
++      "//chrome/browser/ui/webui/app_service_internals",
++      "//chrome/browser/ui/webui/basedev_code",
++      "//chrome/browser/ui/webui/color_pipeline_internals",
++      "//chrome/browser/ui/webui/infobar_internals",
++      "//chrome/browser/ui/webui/new_tab_footer",
++      "//chrome/browser/ui/webui/privacy_sandbox",
++      "//chrome/browser/ui/webui_browser",
++    ]
++
++    if (!is_chromeos) {
++      deps += [ "//chrome/browser/ui/webui/app_home" ]
++    }
++  } else {
++    #is_android
++    deps += [ "//chrome/browser/ui/webui/notifications_internals" ]
++  }
++
++  if (safe_browsing_mode != 0) {
++    deps += [ "//chrome/browser/ui/webui/safe_browsing" ]
++  }
++
++  if (is_win || is_mac || is_linux || is_chromeos) {
++    deps += [
++      "//chrome/browser/ui/lens",
++      "//chrome/browser/ui/views/side_panel",
++      "//chrome/browser/ui/webui/signin",
++    ]
++
++    if (!is_chromeos) {
++      deps += [
++        "//chrome/browser/ui/webui/app_settings",
++        "//chrome/browser/ui/webui/signin:profile",
++        "//chrome/browser/ui/webui/whats_new",
++      ]
++    }
++  }
++
++  if (is_chromeos) {
++    deps += [
++      "//chrome/browser/ui/webui/ash/config",
++      "//chromeos/constants",
++    ]
++  }
++
++  if (enterprise_watermark) {
++    deps += [
++      "//chrome/browser/enterprise/watermark:watermark_view_lib",
++      "//chrome/browser/ui/webui/watermark",
++    ]
++  }
++
++  if (enable_dice_support) {
++    deps += [ "//chrome/browser/ui/webui/signin/signout_confirmation" ]
++  }
++
++  if (enable_glic) {
++    deps += [ "//chrome/browser/glic" ]
++  }
++
++  if (enable_session_service) {
++    deps += [ "//chrome/browser/ui/webui/tab_strip_internals" ]
++  }
++}
++
++source_set("webui") {
++  sources = [
++    "constrained_web_dialog_ui.cc",
++    "constrained_web_dialog_ui.h",
++    "current_channel_logo.cc",
++    "current_channel_logo.h",
++  ]
++
++  sources += get_target_outputs(":webui_url_hashes")
++
++  public_deps = [ "//content/public/browser" ]
++
++  deps = [
++    ":webui_url_hashes",
++    "//chrome/common",
++    "//extensions/buildflags",
++  ]
++  if (enable_extensions_core) {
++    deps += [ "//chrome/browser/extensions" ]
++  }
++  if (!is_android) {
++    deps += [ "//ui/web_dialogs" ]
++  }
++}
++
++if (!is_android) {
++  source_set("webui_util") {
++    sources = [
++      "webui_embedding_context.cc",
++      "webui_embedding_context.h",
++    ]
++
++    deps = [
++      "//chrome/browser/ui/browser_window",
++      "//chrome/browser/ui/tabs:tabs_public",
++    ]
++  }
++}
+diff --git a/build/src/chrome/browser/ui/webui/basedev_code/BUILD.gn b/build/src/chrome/browser/ui/webui/basedev_code/BUILD.gn
+new file mode 100644
+index 0000000..a1c8efd
+--- /dev/null
++++ b/build/src/chrome/browser/ui/webui/basedev_code/BUILD.gn
+@@ -0,0 +1,23 @@
++# Copyright 2025 The Base Dev Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/chromeos/ui_mode.gni")
++
++assert(!is_android)
++
++source_set("basedev_code") {
++  sources = [
++    "basedev_code_ui.cc",
++    "basedev_code_ui.h",
++  ]
++
++  deps = [
++    "//chrome/browser/profiles:profile",
++    "//chrome/browser/ui/webui:webui_util",
++    "//chrome/common",
++    "//chrome/grit:basedev_code_resources",
++    "//chrome/grit:basedev_code_resources_map",
++    "//content/public/browser",
++  ]
++}
+diff --git a/build/src/chrome/browser/ui/webui/basedev_code/basedev_code_ui.cc b/build/src/chrome/browser/ui/webui/basedev_code/basedev_code_ui.cc
+new file mode 100644
+index 0000000..bbfd55c
+--- /dev/null
++++ b/build/src/chrome/browser/ui/webui/basedev_code/basedev_code_ui.cc
+@@ -0,0 +1,33 @@
++// Copyright 2025 The Base Dev Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "chrome/browser/ui/webui/basedev_code/basedev_code_ui.h"
++
++#include "chrome/browser/profiles/profile.h"
++#include "chrome/browser/ui/webui/webui_util.h"
++#include "chrome/common/webui_url_constants.h"
++#include "chrome/grit/basedev_code_resources.h"
++#include "chrome/grit/basedev_code_resources_map.h"
++#include "content/public/browser/web_ui.h"
++#include "content/public/browser/web_ui_data_source.h"
++
++BaseDevCodeUIConfig::BaseDevCodeUIConfig()
++    : DefaultWebUIConfig(content::kChromeUIScheme,
++                        chrome::kChromeUIBaseDevCodeHost) {}
++
++BaseDevCodeUIConfig::~BaseDevCodeUIConfig() = default;
++
++BaseDevCodeUI::BaseDevCodeUI(content::WebUI* web_ui)
++    : content::WebUIController(web_ui) {
++  content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
++      Profile::FromWebUI(web_ui), chrome::kChromeUIBaseDevCodeHost);
++
++  // Add resources
++  webui::SetupWebUIDataSource(
++      source,
++      base::make_span(kBasedevCodeResources, kBasedevCodeResourcesSize),
++      IDR_BASEDEV_CODE_INDEX_HTML);
++}
++
++BaseDevCodeUI::~BaseDevCodeUI() = default;
+diff --git a/build/src/chrome/browser/ui/webui/basedev_code/basedev_code_ui.h b/build/src/chrome/browser/ui/webui/basedev_code/basedev_code_ui.h
+new file mode 100644
+index 0000000..282d2d7
+--- /dev/null
++++ b/build/src/chrome/browser/ui/webui/basedev_code/basedev_code_ui.h
+@@ -0,0 +1,33 @@
++// Copyright 2025 The Base Dev Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef CHROME_BROWSER_UI_WEBUI_BASEDEV_CODE_BASEDEV_CODE_UI_H_
++#define CHROME_BROWSER_UI_WEBUI_BASEDEV_CODE_BASEDEV_CODE_UI_H_
++
++#include "content/public/browser/web_ui_controller.h"
++#include "content/public/browser/webui_config.h"
++
++namespace content {
++class WebUI;
++}
++
++class BaseDevCodeUI;
++
++class BaseDevCodeUIConfig
++    : public content::DefaultWebUIConfig<BaseDevCodeUI> {
++ public:
++  BaseDevCodeUIConfig();
++  ~BaseDevCodeUIConfig() override;
++};
++
++class BaseDevCodeUI : public content::WebUIController {
++ public:
++  explicit BaseDevCodeUI(content::WebUI* web_ui);
++  ~BaseDevCodeUI() override;
++
++  BaseDevCodeUI(const BaseDevCodeUI&) = delete;
++  BaseDevCodeUI& operator=(const BaseDevCodeUI&) = delete;
++};
++
++#endif  // CHROME_BROWSER_UI_WEBUI_BASEDEV_CODE_BASEDEV_CODE_UI_H_
+diff --git a/build/src/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/build/src/chrome/browser/ui/webui/chrome_web_ui_configs.cc
+new file mode 100644
+index 0000000..a34466c
+--- /dev/null
++++ b/build/src/chrome/browser/ui/webui/chrome_web_ui_configs.cc
+@@ -0,0 +1,442 @@
++// Copyright 2022 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "chrome/browser/ui/webui/chrome_web_ui_configs.h"
++
++#include "build/android_buildflags.h"
++#include "build/build_config.h"
++#include "chrome/browser/optimization_guide/optimization_guide_internals_ui.h"
++#include "chrome/browser/ui/webui/about/about_ui.h"
++#include "chrome/browser/ui/webui/accessibility/accessibility_ui.h"
++#include "chrome/browser/ui/webui/autofill_and_password_manager_internals/autofill_internals_ui.h"
++#include "chrome/browser/ui/webui/autofill_and_password_manager_internals/password_manager_internals_ui.h"
++#include "chrome/browser/ui/webui/bluetooth_internals/bluetooth_internals_ui.h"  // nogncheck
++#include "chrome/browser/ui/webui/browsing_topics/browsing_topics_internals_ui.h"
++#include "chrome/browser/ui/webui/chrome_urls/chrome_urls_ui.h"
++#include "chrome/browser/ui/webui/commerce/commerce_internals_ui_config.h"
++#include "chrome/browser/ui/webui/components/components_ui.h"
++#include "chrome/browser/ui/webui/connectors_internals/connectors_internals_ui.h"
++#include "chrome/browser/ui/webui/constrained_web_dialog_ui.h"
++#include "chrome/browser/ui/webui/crashes/crashes_ui.h"
++#include "chrome/browser/ui/webui/data_sharing_internals/data_sharing_internals_ui.h"
++#include "chrome/browser/ui/webui/device_log/device_log_ui.h"
++#include "chrome/browser/ui/webui/download_internals/download_internals_ui.h"
++#include "chrome/browser/ui/webui/engagement/site_engagement_ui.h"
++#include "chrome/browser/ui/webui/family_link_user_internals/family_link_user_internals_ui.h"
++#include "chrome/browser/ui/webui/flags/flags_ui.h"
++#include "chrome/browser/ui/webui/gcm_internals_ui.h"
++#include "chrome/browser/ui/webui/history_clusters/history_clusters_internals_ui_config.h"
++#include "chrome/browser/ui/webui/internal_debug_pages_disabled/internal_debug_pages_disabled_ui.h"
++#include "chrome/browser/ui/webui/interstitials/interstitial_ui.h"
++#include "chrome/browser/ui/webui/local_state/local_state_ui.h"
++#include "chrome/browser/ui/webui/location_internals/location_internals_ui.h"
++#include "chrome/browser/ui/webui/media/media_engagement_ui.h"
++#include "chrome/browser/ui/webui/media/webrtc_logs_ui.h"
++#include "chrome/browser/ui/webui/memory_internals_ui.h"
++#include "chrome/browser/ui/webui/metrics_internals/metrics_internals_ui.h"
++#include "chrome/browser/ui/webui/net_export_ui.h"
++#include "chrome/browser/ui/webui/net_internals/net_internals_ui.h"
++#include "chrome/browser/ui/webui/ntp_tiles_internals_ui.h"
++#include "chrome/browser/ui/webui/omnibox/omnibox_ui.h"
++#include "chrome/browser/ui/webui/policy/policy_ui.h"
++#include "chrome/browser/ui/webui/predictors/predictors_ui.h"
++#include "chrome/browser/ui/webui/privacy_sandbox/privacy_sandbox_internals_ui.h"
++#include "chrome/browser/ui/webui/saved_tab_groups_unsupported/saved_tab_groups_unsupported_ui.h"
++#include "chrome/browser/ui/webui/segmentation_internals/segmentation_internals_ui.h"
++#include "chrome/browser/ui/webui/signin_internals_ui.h"
++#include "chrome/browser/ui/webui/sync_internals/sync_internals_ui.h"
++#include "chrome/browser/ui/webui/translate_internals/translate_internals_ui.h"
++#include "chrome/browser/ui/webui/ungoogled_first_run.h"
++#include "chrome/browser/ui/webui/usb_internals/usb_internals_ui.h"
++#include "chrome/browser/ui/webui/user_actions/user_actions_ui.h"
++#include "chrome/browser/ui/webui/version/version_ui.h"
++#include "components/enterprise/buildflags/buildflags.h"
++#include "components/safe_browsing/buildflags.h"
++#include "components/security_interstitials/content/connection_help_ui.h"
++#include "components/security_interstitials/content/known_interception_disclosure_ui.h"
++#include "content/public/browser/webui_config_map.h"
++#include "extensions/buildflags/buildflags.h"
++#include "printing/buildflags/buildflags.h"
++
++#if BUILDFLAG(ENABLE_WEBUI_CERTIFICATE_VIEWER)
++#include "chrome/browser/ui/webui/certificate_viewer/certificate_viewer_ui.h"
++#endif
++
++#if BUILDFLAG(ENABLE_WEBUI_TAB_STRIP)
++#include "chrome/browser/ui/webui/tab_strip/tab_strip_ui.h"
++#endif
++
++#if !BUILDFLAG(IS_ANDROID)
++#include "chrome/browser/actor/ui/actor_overlay_ui.h"
++#include "chrome/browser/contextual_tasks/contextual_tasks_ui.h"
++#include "chrome/browser/ui/tabs/tab_group_home/tab_group_home_ui.h"
++#include "chrome/browser/ui/webui_browser/webui_browser_ui.h"
++#if !BUILDFLAG(IS_CHROMEOS)
++#include "chrome/browser/ui/webui/app_home/app_home_ui.h"
++#endif  // !BUILDFLAG(IS_CHROMEOS)
++#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++#include "chrome/browser/ui/webui/media_router/cast_feedback_ui.h"
++#endif
++#include "chrome/browser/ui/webui/access_code_cast/access_code_cast_ui.h"
++#include "chrome/browser/ui/webui/actor_internals/actor_internals_ui.h"
++#include "chrome/browser/ui/webui/app_service_internals/app_service_internals_ui.h"
++#include "chrome/browser/ui/webui/autofill_ml_internals/autofill_ml_internals_ui.h"
++#include "chrome/browser/ui/webui/basedev_code/basedev_code_ui.h"
++#include "chrome/browser/ui/webui/bookmarks/bookmarks_ui.h"
++#include "chrome/browser/ui/webui/color_pipeline_internals/color_pipeline_internals_ui.h"
++#include "chrome/browser/ui/webui/commerce/product_specifications_ui.h"
++#include "chrome/browser/ui/webui/commerce/shopping_insights_side_panel_ui.h"
++#include "chrome/browser/ui/webui/downloads/downloads_ui.h"
++#include "chrome/browser/ui/webui/feedback/feedback_ui.h"
++#include "chrome/browser/ui/webui/history/history_ui.h"
++#include "chrome/browser/ui/webui/infobar_internals/infobar_internals_ui.h"
++#include "chrome/browser/ui/webui/inspect/inspect_ui.h"
++#if BUILDFLAG(ENABLE_SESSION_SERVICE)
++#include "chrome/browser/ui/webui/internals/internals_ui.h"
++#include "chrome/browser/ui/webui/tab_strip_internals/tab_strip_internals_ui.h"
++#endif  // BUILDFLAG(ENABLE_SESSION_SERVICE)
++#include "chrome/browser/ui/webui/management/management_ui.h"
++#include "chrome/browser/ui/webui/media_router/media_router_internals_ui.h"
++#include "chrome/browser/ui/webui/new_tab_footer/new_tab_footer_ui.h"
++#include "chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.h"
++#include "chrome/browser/ui/webui/new_tab_page_third_party/new_tab_page_third_party_ui.h"
++#include "chrome/browser/ui/webui/ntp/new_tab_ui.h"
++#include "chrome/browser/ui/webui/omnibox_popup/omnibox_popup_ui.h"
++#include "chrome/browser/ui/webui/on_device_internals/on_device_internals_ui.h"
++#include "chrome/browser/ui/webui/password_manager/password_manager_ui.h"
++#include "chrome/browser/ui/webui/privacy_sandbox/base_dialog_ui.h"
++#include "chrome/browser/ui/webui/privacy_sandbox/privacy_sandbox_dialog_ui.h"
++#include "chrome/browser/ui/webui/profile_internals/profile_internals_ui.h"
++#include "chrome/browser/ui/webui/search_engine_choice/search_engine_choice_ui.h"
++#include "chrome/browser/ui/webui/settings/settings_ui.h"
++#include "chrome/browser/ui/webui/side_panel/bookmarks/bookmarks_side_panel_ui.h"
++#include "chrome/browser/ui/webui/side_panel/comments/comments_side_panel_ui.h"
++#include "chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_ui.h"
++#include "chrome/browser/ui/webui/side_panel/history/history_side_panel_ui.h"
++#include "chrome/browser/ui/webui/side_panel/history_clusters/history_clusters_side_panel_ui.h"
++#include "chrome/browser/ui/webui/side_panel/reading_list/reading_list_ui.h"
++#include "chrome/browser/ui/webui/signin/sync_confirmation_ui.h"
++#include "chrome/browser/ui/webui/suggest_internals/suggest_internals_ui.h"
++#include "chrome/browser/ui/webui/support_tool/support_tool_ui.h"
++#include "chrome/browser/ui/webui/system/system_info_ui.h"
++#include "chrome/browser/ui/webui/tab_search/tab_search_ui.h"
++#include "chrome/browser/ui/webui/user_education_internals/user_education_internals_ui.h"
++#include "chrome/browser/ui/webui/web_app_internals/web_app_internals_ui.h"
++#include "chrome/browser/ui/webui/webui_gallery/webui_gallery_ui.h"
++#include "chrome/browser/ui/webui/webui_js_error/webui_js_error_ui.h"
++#else  // !BUILDFLAG(IS_ANDROID)
++#include "chrome/browser/ui/webui/feed_internals/feed_internals_ui.h"
++#include "chrome/browser/ui/webui/notifications_internals/notifications_internals_ui.h"
++#include "chrome/browser/ui/webui/webapks/webapks_ui.h"
++#endif  // BUILDFLAG(IS_ANDROID)
++
++#if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
++#include "chrome/browser/ui/webui/extensions/extensions_ui.h"
++#endif  // !BUILDFLAG(ENABLE_EXTENSIONS_CORE)
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++#include "chrome/browser/ui/webui/extensions_zero_state_promo/zero_state_promo_ui.h"
++#endif  // ENABLE_EXTENSIONS
++
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++#include "chrome/browser/ui/webui/print_preview/print_preview_ui.h"
++#endif  // BUILDFLAG(ENABLE_PRINT_PREVIEW)
++
++#if BUILDFLAG(IS_CHROMEOS)
++#include "chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.h"
++#include "chrome/browser/ui/webui/ash/dlp_internals/dlp_internals_ui.h"
++#endif  // BUILDFLAG(IS_CHROMEOS)
++
++#if BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)
++#include "chrome/browser/ui/webui/certificate_manager/certificate_manager_ui.h"
++#endif  // BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)
++
++#if BUILDFLAG(IS_WIN)
++#include "chrome/browser/ui/webui/conflicts/conflicts_ui.h"
++#endif  // BUILDFLAG(IS_WIN)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++#include "chrome/browser/ui/webui/app_settings/web_app_settings_ui.h"
++#include "chrome/browser/ui/webui/browser_switch/browser_switch_ui.h"
++#include "chrome/browser/ui/webui/signin/history_sync_optin/history_sync_optin_ui.h"
++#include "chrome/browser/ui/webui/whats_new/whats_new_ui.h"
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
++    BUILDFLAG(IS_ANDROID)
++#include "chrome/browser/ui/webui/sandbox/sandbox_internals_ui.h"
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) ||
++        // BUILDFLAG(IS_ANDROID)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
++    BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_DESKTOP_ANDROID)
++#include "chrome/browser/ui/webui/discards/discards_ui.h"
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) ||
++        // BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_DESKTOP_ANDROID)
++
++#if BUILDFLAG(ENABLE_DICE_SUPPORT)
++#include "chrome/browser/ui/webui/signin/batch_upload_ui.h"
++#include "chrome/browser/ui/webui/signin/dice_web_signin_intercept_ui.h"
++#include "chrome/browser/ui/webui/signin/signout_confirmation/signout_confirmation_ui.h"
++#endif  // BUILDFLAG(ENABLE_DICE_SUPPORT)
++
++#if BUILDFLAG(ENABLE_DICE_SUPPORT) || BUILDFLAG(IS_CHROMEOS)
++#include "chrome/browser/ui/webui/signin/inline_login_ui.h"
++#endif
++
++#if BUILDFLAG(FULL_SAFE_BROWSING)
++#include "chrome/browser/ui/webui/reset_password/reset_password_ui.h"
++#endif
++
++#if !BUILDFLAG(IS_CHROMEOS) && !BUILDFLAG(IS_ANDROID)
++#include "chrome/browser/ui/webui/intro/intro_ui.h"
++#include "chrome/browser/ui/webui/signin/managed_user_profile_notice_ui.h"
++#include "chrome/browser/ui/webui/signin/profile_customization_ui.h"
++#include "chrome/browser/ui/webui/signin/profile_picker_ui.h"
++#include "chrome/browser/ui/webui/signin/signin_email_confirmation_ui.h"
++#include "chrome/browser/ui/webui/signin/signin_error_ui.h"
++#endif  //  !BUILDFLAG(IS_CHROMEOS) && !BUILDFLAG(IS_ANDROID)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++#include "chrome/browser/ui/webui/on_device_translation_internals/on_device_translation_internals_ui.h"
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++
++#if BUILDFLAG(ENABLE_GLIC)
++#include "chrome/browser/glic/fre/glic_fre_ui.h"
++#include "chrome/browser/glic/host/glic_ui.h"
++#endif
++
++#if BUILDFLAG(SAFE_BROWSING_AVAILABLE)
++#include "chrome/browser/ui/webui/safe_browsing/chrome_safe_browsing_ui.h"
++#endif
++
++#if BUILDFLAG(ENTERPRISE_WATERMARK)
++#include "chrome/browser/ui/webui/watermark/watermark_ui.h"
++#endif
++
++void RegisterChromeWebUIConfigs() {
++  // Don't add calls to `AddWebUIConfig()` for Ash-specific WebUIs here. Add
++  // them in chrome_web_ui_configs_chromeos.cc.
++#if BUILDFLAG(IS_CHROMEOS)
++  ash::RegisterAshChromeWebUIConfigs();
++#endif  // BUILDFLAG(IS_CHROMEOS)
++
++  auto& map = content::WebUIConfigMap::GetInstance();
++  map.AddWebUIConfig(std::make_unique<AccessibilityUIConfig>());
++  map.AddWebUIConfig(std::make_unique<AutofillInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<BaseDevCodeUIConfig>());
++  map.AddWebUIConfig(std::make_unique<BluetoothInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<BrowsingTopicsInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<chromeos::DeviceLogUIConfig>());
++  map.AddWebUIConfig(std::make_unique<chrome_urls::ChromeUrlsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<CrashesUIConfig>());
++  map.AddWebUIConfig(std::make_unique<commerce::CommerceInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ComponentsUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<security_interstitials::ConnectionHelpUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<enterprise_connectors::ConnectorsInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ConstrainedWebDialogUIConfig>());
++  map.AddWebUIConfig(std::make_unique<CreditsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<DataSharingInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<DownloadInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<FamilyLinkUserInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<FlagsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<GCMInternalsUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<
++          history_clusters_internals::HistoryClustersInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<InternalDebugPagesDisabledUIConfig>());
++  map.AddWebUIConfig(std::make_unique<InterstitialUIConfig>());
++  map.AddWebUIConfig(std::make_unique<LocalStateUIConfig>());
++  map.AddWebUIConfig(std::make_unique<LocationInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<MediaEngagementUIConfig>());
++  map.AddWebUIConfig(std::make_unique<MemoryInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<MetricsInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NetExportUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NetInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NTPTilesInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<OmniboxUIConfig>());
++  map.AddWebUIConfig(std::make_unique<OptimizationGuideInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<PasswordManagerInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<PolicyUIConfig>());
++  map.AddWebUIConfig(std::make_unique<PredictorsUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<
++          security_interstitials::KnownInterceptionDisclosureUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SavedTabGroupsUnsupportedUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SegmentationInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SignInInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SiteEngagementUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SyncInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<TranslateInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<UngoogledFirstRunUIConfig>());
++  map.AddWebUIConfig(std::make_unique<UsbInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<UserActionsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<VersionUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebRtcLogsUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<
++          privacy_sandbox_internals::PrivacySandboxInternalsUIConfig>());
++
++#if BUILDFLAG(ENABLE_WEBUI_CERTIFICATE_VIEWER)
++  map.AddWebUIConfig(std::make_unique<CertificateViewerUIConfig>());
++#endif
++
++#if BUILDFLAG(ENABLE_WEBUI_TAB_STRIP)
++  map.AddWebUIConfig(std::make_unique<TabStripUIConfig>());
++#endif
++
++#if BUILDFLAG(IS_ANDROID)
++  map.AddWebUIConfig(std::make_unique<FeedInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NotificationsInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebApksUIConfig>());
++#else  // BUILDFLAG(IS_ANDROID)
++#if !BUILDFLAG(IS_CHROMEOS)
++  map.AddWebUIConfig(std::make_unique<AppHomeUIConfig>());
++#endif  // !BUILDFLAG(IS_CHROMEOS)
++#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
++  map.AddWebUIConfig(std::make_unique<media_router::CastFeedbackUIConfig>());
++#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
++  map.AddWebUIConfig(std::make_unique<actor::ui::ActorOverlayUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ActorInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<AppServiceInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<media_router::AccessCodeCastUIConfig>());
++  map.AddWebUIConfig(std::make_unique<BookmarksSidePanelUIConfig>());
++  map.AddWebUIConfig(std::make_unique<BookmarksUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ColorPipelineInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<CommentsSidePanelUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ContextualTasksUIConfig>());
++  map.AddWebUIConfig(std::make_unique<CustomizeChromeUIConfig>());
++  map.AddWebUIConfig(std::make_unique<DownloadsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<FeedbackUIConfig>());
++  map.AddWebUIConfig(std::make_unique<HistoryUIConfig>());
++  map.AddWebUIConfig(std::make_unique<HistorySidePanelUIConfig>());
++  map.AddWebUIConfig(std::make_unique<HistoryClustersSidePanelUIConfig>());
++  map.AddWebUIConfig(std::make_unique<InfobarInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<InspectUIConfig>());
++#if BUILDFLAG(ENABLE_SESSION_SERVICE)
++  map.AddWebUIConfig(std::make_unique<InternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<TabStripInternalsUIConfig>());
++#endif  // BUILDFLAG(ENABLE_SESSION_SERVICE)
++  map.AddWebUIConfig(std::make_unique<ManagementUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<media_router::MediaRouterInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NewTabFooterUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NewTabPageUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NewTabPageThirdPartyUIConfig>());
++  map.AddWebUIConfig(std::make_unique<NewTabUIConfig>());
++  map.AddWebUIConfig(std::make_unique<OmniboxPopupUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<on_device_internals::OnDeviceInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<PasswordManagerUIConfig>());
++  map.AddWebUIConfig(std::make_unique<PrivacySandboxDialogUIConfig>());
++  map.AddWebUIConfig(std::make_unique<privacy_sandbox::BaseDialogUIConfig>());
++  map.AddWebUIConfig(
++      std::make_unique<commerce::ProductSpecificationsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ProfileInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ReadingListUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SearchEngineChoiceUIConfig>());
++  map.AddWebUIConfig(std::make_unique<settings::SettingsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ShoppingInsightsSidePanelUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SuggestInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SupportToolUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SyncConfirmationUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SystemInfoUIConfig>());
++  map.AddWebUIConfig(std::make_unique<tabs::TabGroupHomeUIConfig>());
++  map.AddWebUIConfig(std::make_unique<TabSearchUIConfig>());
++  map.AddWebUIConfig(std::make_unique<TermsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<UserEducationInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebAppInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebUIBrowserUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebuiGalleryUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebUIJsErrorUIConfig>());
++#endif  // BUILDFLAG(IS_ANDROID)
++
++#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_OPENBSD)
++  map.AddWebUIConfig(std::make_unique<LinuxProxyConfigUI>());
++#endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) ||
++        // BUILDFLAG(IS_OPENBSD)
++
++#if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
++  map.AddWebUIConfig(std::make_unique<extensions::ExtensionsUIConfig>());
++#endif  // !BUILDFLAG(ENABLE_EXTENSIONS_CORE)
++
++#if BUILDFLAG(ENABLE_EXTENSIONS)
++  map.AddWebUIConfig(
++      std::make_unique<extensions::ZeroStatePromoControllerConfig>());
++#endif  // !BUILDFLAG(ENABLE_EXTENSIONS)
++
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++  map.AddWebUIConfig(std::make_unique<printing::PrintPreviewUIConfig>());
++#endif  // BUILDFLAG(ENABLE_PRINT_PREVIEW)
++
++#if BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)
++  map.AddWebUIConfig(std::make_unique<CertificateManagerUIConfig>());
++#endif  // BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)
++
++#if BUILDFLAG(IS_CHROMEOS)
++  map.AddWebUIConfig(std::make_unique<policy::DlpInternalsUIConfig>());
++#endif  // BUILDFLAG(IS_CHROMEOS)
++
++#if BUILDFLAG(IS_WIN)
++  map.AddWebUIConfig(std::make_unique<ConflictsUIConfig>());
++#endif  // BUILDFLAG(IS_WIN)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++  map.AddWebUIConfig(std::make_unique<BrowserSwitchUIConfig>());
++  map.AddWebUIConfig(std::make_unique<HistorySyncOptinUIConfig>());
++  map.AddWebUIConfig(std::make_unique<OnDeviceTranslationInternalsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WebAppSettingsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<WhatsNewUIConfig>());
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
++    BUILDFLAG(IS_ANDROID)
++  map.AddWebUIConfig(std::make_unique<SandboxInternalsUIConfig>());
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) ||
++        // BUILDFLAG(IS_ANDROID)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
++    BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_DESKTOP_ANDROID)
++  map.AddWebUIConfig(std::make_unique<DiscardsUIConfig>());
++#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) ||
++        // BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_DESKTOP_ANDROID)
++
++#if BUILDFLAG(ENABLE_DICE_SUPPORT)
++  map.AddWebUIConfig(std::make_unique<BatchUploadUIConfig>());
++  map.AddWebUIConfig(std::make_unique<DiceWebSigninInterceptUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SignoutConfirmationUIConfig>());
++#endif  // BUILDFLAG(ENABLE_DICE_SUPPORT)
++
++#if BUILDFLAG(ENABLE_DICE_SUPPORT) || BUILDFLAG(IS_CHROMEOS)
++  map.AddWebUIConfig(std::make_unique<InlineLoginUIConfig>());
++#endif
++
++#if BUILDFLAG(FULL_SAFE_BROWSING)
++  map.AddWebUIConfig(std::make_unique<ResetPasswordUIConfig>());
++#endif
++
++#if !BUILDFLAG(IS_CHROMEOS) && !BUILDFLAG(IS_ANDROID)
++  map.AddWebUIConfig(std::make_unique<ManagedUserProfileNoticeUIConfig>());
++  map.AddWebUIConfig(std::make_unique<IntroUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ProfileCustomizationUIConfig>());
++  map.AddWebUIConfig(std::make_unique<ProfilePickerUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SigninErrorUIConfig>());
++  map.AddWebUIConfig(std::make_unique<SigninEmailConfirmationUIConfig>());
++#endif  //  !BUILDFLAG(IS_CHROMEOS) && !BUILDFLAG(IS_ANDROID)
++#if BUILDFLAG(ENABLE_GLIC)
++  map.AddWebUIConfig(std::make_unique<glic::GlicUIConfig>());
++  map.AddWebUIConfig(std::make_unique<glic::GlicFreUIConfig>());
++#endif
++
++#if BUILDFLAG(SAFE_BROWSING_AVAILABLE)
++  map.AddWebUIConfig(
++      std::make_unique<safe_browsing::ChromeSafeBrowsingUIConfig>());
++#endif
++
++#if BUILDFLAG(ENTERPRISE_WATERMARK)
++  map.AddWebUIConfig(std::make_unique<WatermarkUIConfig>());
++#endif
++}
+diff --git a/build/src/chrome/common/webui_url_constants.h b/build/src/chrome/common/webui_url_constants.h
+new file mode 100644
+index 0000000..2d689ad
+--- /dev/null
++++ b/build/src/chrome/common/webui_url_constants.h
+@@ -0,0 +1,734 @@
++// Copyright 2017 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++// Contains constants for WebUI UI/Host/SubPage constants. Anything else go in
++// chrome/common/url_constants.h.
++
++#ifndef CHROME_COMMON_WEBUI_URL_CONSTANTS_H_
++#define CHROME_COMMON_WEBUI_URL_CONSTANTS_H_
++
++#include <stddef.h>
++
++#include <string_view>
++
++#include "base/containers/flat_set.h"
++#include "base/containers/span.h"
++#include "base/strings/cstring_view.h"
++#include "build/android_buildflags.h"
++#include "build/branding_buildflags.h"
++#include "build/build_config.h"
++#include "chrome/common/buildflags.h"
++#include "components/enterprise/buildflags/buildflags.h"
++#include "components/signin/public/base/signin_buildflags.h"
++#include "content/public/common/url_constants.h"
++#include "media/media_buildflags.h"
++#include "printing/buildflags/buildflags.h"
++
++namespace chrome {
++
++// chrome: components (without schemes) and URLs (including schemes).
++// e.g. kChromeUIFooHost = "foo" and kChromeUIFooURL = "chrome://foo/"
++// Not all components have corresponding URLs and vice versa. Only add as
++// needed.
++// Please keep in alphabetical order, with OS/feature specific sections below.
++inline constexpr char kChromeUIAboutHost[] = "about";
++inline constexpr char kChromeUIAboutURL[] = "chrome://about/";
++inline constexpr char kChromeUIAccessCodeCastHost[] = "access-code-cast";
++inline constexpr char kChromeUIAccessCodeCastURL[] =
++    "chrome://access-code-cast/";
++inline constexpr char kChromeUIAccessibilityHost[] = "accessibility";
++inline constexpr char kChromeUIAccountSettingsURL[] =
++    "chrome://settings/account";
++inline constexpr char kChromeUIActivateSafetyCheckSettingsURL[] =
++    "chrome://settings/safetyCheck?activateSafetyCheck";
++inline constexpr char kChromeUIActorInternalsHost[] = "actor-internals";
++inline constexpr char kChromeUIActorOverlayHost[] = "actor-overlay";
++inline constexpr char kChromeUIActorOverlayURL[] = "chrome://actor-overlay";
++inline constexpr char kChromeUIAllSitesPath[] = "/content/all";
++inline constexpr char kChromeUIAppIconHost[] = "app-icon";
++inline constexpr char kChromeUIAppIconURL[] = "chrome://app-icon/";
++inline constexpr char kChromeUIAppLauncherPageHost[] = "apps";
++inline constexpr char kChromeUIAppsURL[] = "chrome://apps/";
++inline constexpr char kChromeUIAppsWithDeprecationDialogURL[] =
++    "chrome://apps?showDeletionDialog=";
++inline constexpr char kChromeUIAppsWithForceInstalledDeprecationDialogURL[] =
++    "chrome://apps?showForceInstallDialog=";
++inline constexpr char kChromeUIAutofillInternalsHost[] = "autofill-internals";
++#if BUILDFLAG(ENABLE_DICE_SUPPORT)
++inline constexpr char kChromeUIBatchUploadHost[] = "batch-upload";
++inline constexpr char kChromeUIBatchUploadURL[] = "chrome://batch-upload/";
++#endif
++inline constexpr char kChromeUIBaseDevCodeHost[] = "code";
++inline constexpr char kChromeUIBaseDevCodeURL[] = "chrome://code/";
++inline constexpr char kChromeUIBluetoothInternalsHost[] = "bluetooth-internals";
++inline constexpr char kChromeUIBookmarksHost[] = "bookmarks";
++inline constexpr char kChromeUIBookmarksURL[] = "chrome://bookmarks/";
++inline constexpr char kChromeUIBrowsingTopicsInternalsHost[] =
++    "topics-internals";
++inline constexpr char kChromeUICertificateViewerHost[] = "view-cert";
++inline constexpr char kChromeUICertificateViewerURL[] = "chrome://view-cert/";
++inline constexpr char kChromeUIChromeSigninHost[] = "chrome-signin";
++inline constexpr char kChromeUIChromeSigninURL[] = "chrome://chrome-signin/";
++inline constexpr char kChromeUIChromeURLsHost[] = "chrome-urls";
++inline constexpr char kChromeUIChromeURLsURL[] = "chrome://chrome-urls/";
++inline constexpr char16_t kChromeUIChromeURLsURL16[] = u"chrome://chrome-urls/";
++inline constexpr char kChromeUIColorPipelineInternalsHost[] =
++    "color-pipeline-internals";
++inline constexpr char kChromeUIColorPipelineInternalsURL[] =
++    "chrome://color-pipeline-internals";
++inline constexpr char kChromeUIComponentsHost[] = "components";
++inline constexpr char kChromeUIComponentsUrl[] = "chrome://components";
++inline constexpr char kChromeUIConflictsHost[] = "conflicts";
++inline constexpr char kChromeUIConnectorsInternalsHost[] =
++    "connectors-internals";
++inline constexpr char kChromeUIConstrainedHTMLTestURL[] =
++    "chrome://constrained-test/";
++inline constexpr char kChromeUIContentSettingsURL[] =
++    "chrome://settings/content";
++inline constexpr char16_t kChromeUIContentSettingsURL16[] =
++    u"chrome://settings/content";
++inline constexpr char16_t kChromeUICookieSettingsURL[] =
++    u"chrome://settings/cookies";
++inline constexpr char kChromeUICrashesHost[] = "crashes";
++inline constexpr char kChromeUICrashesUrl[] = "chrome://crashes";
++inline constexpr char kChromeUICrashHost[] = "crash";
++inline constexpr char kChromeUICreditsHost[] = "credits";
++inline constexpr char kChromeUICreditsURL[] = "chrome://credits/";
++inline constexpr char16_t kChromeUICreditsURL16[] = u"chrome://credits/";
++inline constexpr char kChromeUIDataSharingInternalsHost[] =
++    "data-sharing-internals";
++inline constexpr char kChromeUIDefaultHost[] = "version";
++inline constexpr char kChromeUIDelayedHangUIHost[] = "delayeduithreadhang";
++inline constexpr char kChromeUIDeviceLogHost[] = "device-log";
++inline constexpr char kChromeUIDevToolsBlankPath[] = "blank";
++inline constexpr char kChromeUIDevToolsBundledPath[] = "bundled";
++inline constexpr char kChromeUIDevToolsCustomPath[] = "custom";
++inline constexpr char kChromeUIDevToolsHost[] = "devtools";
++inline constexpr char kChromeUIDevToolsRemotePath[] = "remote";
++inline constexpr char kChromeUIDevToolsURL[] =
++    "devtools://devtools/bundled/inspector.html";
++inline constexpr char kChromeUIDiceWebSigninInterceptChromeSigninSubPage[] =
++    "chrome-signin";
++inline constexpr char kChromeUIDiceWebSigninInterceptChromeSigninURL[] =
++    "chrome://signin-dice-web-intercept.top-chrome/chrome-signin";
++inline constexpr char kChromeUIDiceWebSigninInterceptHost[] =
++    "signin-dice-web-intercept.top-chrome";
++inline constexpr char kChromeUIDiceWebSigninInterceptURL[] =
++    "chrome://signin-dice-web-intercept.top-chrome/";
++inline constexpr char kChromeUIDownloadInternalsHost[] = "download-internals";
++inline constexpr char kChromeUIDownloadsHost[] = "downloads";
++inline constexpr char kChromeUIDownloadsURL[] = "chrome://downloads/";
++inline constexpr char kChromeUIDriveInternalsHost[] = "drive-internals";
++inline constexpr char kChromeUIEDUCoexistenceLoginURLV2[] =
++    "chrome://chrome-signin/edu-coexistence";
++inline constexpr char kChromeUIExtensionIconHost[] = "extension-icon";
++inline constexpr char kChromeUIExtensionIconURL[] = "chrome://extension-icon/";
++inline constexpr char kChromeUIExtensionsHost[] = "extensions";
++inline constexpr char kChromeUIExtensionsInternalsHost[] =
++    "extensions-internals";
++inline constexpr char kChromeUIExtensionsURL[] = "chrome://extensions/";
++inline constexpr char kChromeUIExtensionsZeroStatePromoHost[] =
++    "extensions-zero-state";
++inline constexpr char kChromeUIExtensionsZeroStatePromoURL[] =
++    "chrome://extensions-zero-state";
++inline constexpr char kChromeUIFamilyLinkUserInternalsHost[] =
++    "family-link-user-internals";
++inline constexpr char kChromeUIFavicon2Host[] = "favicon2";
++inline constexpr char kChromeUIFaviconHost[] = "favicon";
++inline constexpr char kChromeUIFaviconURL[] = "chrome://favicon/";
++inline constexpr char kChromeUIFeedbackHost[] = "feedback";
++inline constexpr char kChromeUIFeedbackURL[] = "chrome://feedback/";
++inline constexpr char kChromeUIFileiconURL[] = "chrome://fileicon/";
++inline constexpr char kChromeUIFlagsHost[] = "flags";
++inline constexpr char kChromeUIFlagsURL[] = "chrome://flags/";
++inline constexpr char16_t kChromeUIFlagsURL16[] = u"chrome://flags/";
++inline constexpr char kChromeUIFloatingWorkspaceDialogHost[] =
++    "floating-workspace";
++inline constexpr char kChromeUIFloatingWorkspaceDialogURL[] =
++    "chrome://floating-workspace";
++inline constexpr char kChromeUIGCMInternalsHost[] = "gcm-internals";
++inline constexpr char kChromeUIGlicHost[] = "glic";
++inline constexpr char kChromeUIGlicURL[] = "chrome://glic/";
++inline constexpr char kChromeUIGlicFreHost[] = "glic-fre";
++inline constexpr char kChromeUIGlicFreURL[] = "chrome://glic-fre";
++inline constexpr char kChromeUIHangUIHost[] = "uithreadhang";
++inline constexpr char kChromeUIHelpHost[] = "help";
++inline constexpr char kChromeUIHelpURL[] = "chrome://help/";
++inline constexpr char kChromeUIHistoryHost[] = "history";
++inline constexpr char kChromeUIHistorySyncedTabs[] = "/syncedTabs";
++inline constexpr char kChromeUIHistoryURL[] = "chrome://history/";
++inline constexpr char16_t kChromeUIHistoryURL16[] = u"chrome://history/";
++inline constexpr char kChromeUIIdentityInternalsHost[] = "identity-internals";
++inline constexpr char kChromeUIInfobarInternalsHost[] = "infobar-internals";
++inline constexpr char kChromeUIInfobarInternalsURL[] =
++    "chrome://infobar-internals/";
++inline constexpr char kChromeUIImageHost[] = "image";
++inline constexpr char kChromeUIImageURL[] = "chrome://image/";
++inline constexpr char kChromeUIInspectHost[] = "inspect";
++inline constexpr char kChromeUIInspectURL[] = "chrome://inspect/";
++inline constexpr char kChromeUIInternalDebugPagesDisabledHost[] =
++    "debug-webuis-disabled";
++inline constexpr char kChromeUIInternalDebugPagesDisabledURL[] =
++    "chrome://debug-webuis-disabled/";
++inline constexpr char kChromeUIInternalsHost[] = "internals";
++inline constexpr char kChromeUIInterstitialHost[] = "interstitials";
++inline constexpr char kChromeUIInterstitialURL[] = "chrome://interstitials/";
++inline constexpr char kChromeUIKillHost[] = "kill";
++inline constexpr char kChromeUILauncherInternalsHost[] = "launcher-internals";
++inline constexpr char kChromeUILocalStateHost[] = "local-state";
++inline constexpr char kChromeUILocalStateURL[] = "chrome://local-state";
++inline constexpr char kChromeUILocationInternalsHost[] = "location-internals";
++inline constexpr char kChromeUIManagementHost[] = "management";
++inline constexpr char kChromeUIManagementURL[] = "chrome://management";
++inline constexpr char16_t kChromeUIManagementURL16[] = u"chrome://management";
++inline constexpr char kChromeUIMediaEngagementHost[] = "media-engagement";
++inline constexpr char kChromeUIMediaRouterInternalsHost[] =
++    "media-router-internals";
++inline constexpr char kChromeUIMemoryInternalsHost[] = "memory-internals";
++inline constexpr char kChromeUIMetricsInternalsHost[] = "metrics-internals";
++inline constexpr char kChromeUINetExportHost[] = "net-export";
++inline constexpr char kChromeUINetInternalsHost[] = "net-internals";
++inline constexpr char kChromeUINetInternalsURL[] = "chrome://net-internals/";
++inline constexpr char kChromeUINewTabHost[] = "newtab";
++inline constexpr char kChromeUINewTabFooterHost[] = "newtab-footer";
++inline constexpr char kChromeUINewTabPageHost[] = "new-tab-page";
++inline constexpr char kChromeUINewTabPageThirdPartyHost[] =
++    "new-tab-page-third-party";
++inline constexpr char kChromeUINewTabPageThirdPartyURL[] =
++inline constexpr char kChromeUIBaseDevAIAssistantModeSidePanelHost[] = "basedev-aiassistant-side-panel";
++inline constexpr char kChromeUIBaseDevAIAssistantModeSidePanelURL[] = "chrome://basedev-aiassistant-side-panel/";
++    "chrome://new-tab-page-third-party/";
++inline constexpr char kChromeUINewTabPageURL[] = "chrome://new-tab-page/";
++inline constexpr char kChromeUINewTabURL[] = "chrome://newtab/";
++inline constexpr char kChromeUINewTabFooterURL[] = "chrome://newtab-footer/";
++inline constexpr char kChromeUIUntrustedNtpMicrosoftAuthHost[] =
++    "ntp-microsoft-auth";
++inline constexpr char kChromeUIUntrustedNtpMicrosoftAuthURL[] =
++    "chrome-untrusted://ntp-microsoft-auth/";
++inline constexpr char kChromeUINTPTilesInternalsHost[] = "ntp-tiles-internals";
++inline constexpr char kChromeUIOmniboxHost[] = "omnibox";
++inline constexpr char kChromeUIOmniboxPopupHost[] = "omnibox-popup.top-chrome";
++inline constexpr char kChromeUIOmniboxPopupURL[] =
++    "chrome://omnibox-popup.top-chrome/";
++inline constexpr char kChromeUIOmniboxURL[] = "chrome://omnibox/";
++inline constexpr char kChromeUIOnDeviceTranslationInternalsHost[] =
++    "on-device-translation-internals";
++inline constexpr char kChromeUIPasswordManagerCheckupURL[] =
++    "chrome://password-manager/checkup?start=true";
++inline constexpr char kChromeUIPasswordManagerInternalsHost[] =
++    "password-manager-internals";
++inline constexpr char kChromeUIPasswordManagerSettingsURL[] =
++    "chrome://password-manager/settings";
++inline constexpr char kChromeUIPasswordManagerURL[] =
++    "chrome://password-manager";
++inline constexpr char kChromeUiPasswordChangeUrl[] =
++    "chrome://password-manager/settings/password-change";
++inline constexpr char kChromeUIPolicyHost[] = "policy";
++inline constexpr char kChromeUIPolicyTestURL[] = "chrome://policy/test";
++inline constexpr char kChromeUIPolicyURL[] = "chrome://policy/";
++inline constexpr char kChromeUIPredictorsHost[] = "predictors";
++inline constexpr char kChromeUIPrefsInternalsHost[] = "prefs-internals";
++inline constexpr char kChromeUIPrintURL[] = "chrome://print/";
++inline constexpr char kChromeUIPrivacySandboxBaseDialogURL[] =
++    "chrome://privacy-sandbox-base-dialog";
++inline constexpr char kChromeUIPrivacySandboxBaseDialogHost[] =
++    "privacy-sandbox-base-dialog";
++inline constexpr char kChromeUIPrivacySandboxDialogCombinedPath[] = "combined";
++inline constexpr char kChromeUIPrivacySandboxDialogHost[] =
++    "privacy-sandbox-dialog";
++inline constexpr char kChromeUIPrivacySandboxDialogNoticePath[] = "notice";
++inline constexpr char kChromeUIPrivacySandboxDialogNoticeRestrictedPath[] =
++    "restricted";
++inline constexpr char kChromeUIPrivacySandboxDialogURL[] =
++    "chrome://privacy-sandbox-dialog";
++inline constexpr char16_t kChromeUIPrivacySandboxFledgeURL[] =
++    u"chrome://settings/adPrivacy/sites";
++inline constexpr char kChromeUIPrivacySandboxInternalsHost[] =
++    "privacy-sandbox-internals";
++inline constexpr char kChromeUIPrivacySandboxInternalsURL[] =
++    "chrome://privacy-sandbox-internals";
++inline constexpr char16_t kChromeUIPrivacySandboxManageTopicsLearnMoreURL[] =
++    u"https://support.9oo91e.qjz9zk/chrome?p=ad_privacy";
++inline constexpr char16_t kChromeUIPrivacySandboxTopicsURL[] =
++    u"chrome://settings/adPrivacy/interests";
++inline constexpr char kChromeUIProfileInternalsHost[] = "profile-internals";
++inline constexpr char kChromeUIQuitHost[] = "quit";
++inline constexpr char kChromeUIQuitURL[] = "chrome://quit/";
++inline constexpr char kChromeUIResetPasswordHost[] = "reset-password";
++inline constexpr char kChromeUIResetPasswordURL[] = "chrome://reset-password/";
++inline constexpr char kChromeUIRestartHost[] = "restart";
++inline constexpr char kChromeUIRestartURL[] = "chrome://restart/";
++inline constexpr char kChromeUISafetyPixelbookURL[] =
++    "https://g.co/Pixelbook/legal";
++inline constexpr char kChromeUISafetyPixelSlateURL[] =
++    "https://g.co/PixelSlate/legal";
++inline constexpr char kChromeUISavedTabGroupsUnsupportedHost[] =
++    "saved-tab-groups-unsupported";
++inline constexpr char kChromeUISegmentationInternalsHost[] =
++    "segmentation-internals";
++inline constexpr char kChromeUISensorInfoHost[] = "sensor-info";
++inline constexpr char kChromeUISettingsHost[] = "settings";
++inline constexpr char16_t kChromeUISettingsHost16[] = u"settings";
++inline constexpr char kChromeUISettingsURL[] = "chrome://settings/";
++inline constexpr char16_t kChromeUISettingsURL16[] = u"chrome://settings/";
++inline constexpr char kChromeUISigninEmailConfirmationHost[] =
++    "signin-email-confirmation";
++inline constexpr char kChromeUISigninEmailConfirmationURL[] =
++    "chrome://signin-email-confirmation";
++inline constexpr char kChromeUISigninErrorHost[] = "signin-error";
++inline constexpr char kChromeUISigninErrorURL[] = "chrome://signin-error/";
++inline constexpr char kChromeUISignInInternalsHost[] = "signin-internals";
++#if BUILDFLAG(ENABLE_DICE_SUPPORT)
++inline constexpr char kChromeUISignoutConfirmationHost[] =
++    "signout-confirmation";
++inline constexpr char kChromeUISignoutConfirmationURL[] =
++    "chrome://signout-confirmation";
++#endif
++inline constexpr char kChromeUISiteEngagementHost[] = "site-engagement";
++inline constexpr char kChromeUISplitViewNewTabPageURL[] =
++    "chrome://tab-search.top-chrome/split_new_tab_page.html";
++inline constexpr char kChromeUISuggestInternalsHost[] = "suggest-internals";
++inline constexpr char kChromeUISuggestInternalsURL[] =
++    "chrome://suggest-internals/";
++inline constexpr char kChromeUISupervisedUserPassphrasePageHost[] =
++    "managed-user-passphrase";
++inline constexpr char kChromeUISupportToolHost[] = "support-tool";
++inline constexpr char kChromeUISyncConfirmationHost[] = "sync-confirmation";
++inline constexpr char kChromeUISyncConfirmationLoadingPath[] = "loading";
++inline constexpr char kChromeUISyncConfirmationURL[] =
++    "chrome://sync-confirmation/";
++inline constexpr char kChromeUISyncInternalsHost[] = "sync-internals";
++inline constexpr char kChromeUISystemInfoHost[] = "system";
++inline constexpr char kChromeUITermsHost[] = "terms";
++inline constexpr char kChromeUITermsURL[] = "chrome://terms/";
++inline constexpr char kChromeUIThemeHost[] = "theme";
++inline constexpr char kChromeUIThemeURL[] = "chrome://theme/";
++inline constexpr char kChromeUITopChromeDomain[] = "top-chrome";
++inline constexpr char kChromeUITranslateInternalsHost[] = "translate-internals";
++inline constexpr char kChromeUIUntrustedComposeHost[] = "compose";
++inline constexpr char kChromeUIUntrustedComposeUrl[] =
++    "chrome-untrusted://compose/";
++inline constexpr char kChromeUIUntrustedDataSharingHost[] = "data-sharing";
++inline constexpr char kChromeUIUntrustedDataSharingURL[] =
++    "chrome-untrusted://data-sharing/";
++inline constexpr char kChromeUIUntrustedDataSharingAPIURL[] =
++    "chrome-untrusted://data-sharing/data_sharing_api.html";
++inline constexpr char kChromeUIUntrustedFavicon2URL[] =
++    "chrome-untrusted://favicon2/";
++inline constexpr char kChromeUIUntrustedImageEditorURL[] =
++    "chrome-untrusted://image-editor/";
++inline constexpr char kChromeUIUntrustedPrintURL[] =
++    "chrome-untrusted://print/";
++inline constexpr char kChromeUIUntrustedPrivacySandboxDialogURL[] =
++    "chrome-untrusted://privacy-sandbox-dialog/";
++inline constexpr char
++    kChromeUIUntrustedPrivacySandboxDialogPrivacyPolicyPath[] =
++        "privacy-policy";
++inline constexpr char kChromeUIUntrustedThemeURL[] =
++    "chrome-untrusted://theme/";
++inline constexpr char kChromeUIUntrustedWebUITestURL[] =
++    "chrome-untrusted://webui-test/";
++inline constexpr char kChromeUIUsbInternalsHost[] = "usb-internals";
++inline constexpr char kChromeUIUserActionsHost[] = "user-actions";
++inline constexpr char kChromeUIUserEducationInternalsHost[] =
++    "user-education-internals";
++inline constexpr char kChromeUIUserEducationInternalsURL[] =
++    "chrome://user-education-internals";
++inline constexpr char kChromeUIVersionHost[] = "version";
++inline constexpr char kChromeUIVersionURL[] = "chrome://version/";
++inline constexpr char16_t kChromeUIVersionURL16[] = u"chrome://version/";
++inline constexpr char kChromeUIWebRtcLogsHost[] = "webrtc-logs";
++inline constexpr char kChromeUIWebuiGalleryHost[] = "webui-gallery";
++inline constexpr char kChromeUIWebUITestHost[] = "webui-test";
++
++#if BUILDFLAG(IS_ANDROID)
++inline constexpr char kChromeUIJavaCrashURL[] = "chrome://java-crash/";
++inline constexpr char kChromeUINativeBookmarksURL[] =
++    "chrome-native://bookmarks/";
++inline constexpr char kChromeUINativeExploreURL[] = "chrome-native://explore";
++inline constexpr char kChromeUINativeNewTabURL[] = "chrome-native://newtab/";
++inline constexpr char kChromeUINotificationsInternalsHost[] =
++    "notifications-internals";
++inline constexpr char kChromeUISnippetsInternalsHost[] = "snippets-internals";
++inline constexpr char kChromeUIWebApksHost[] = "webapks";
++#else
++inline constexpr char kAdPrivacySubPagePath[] = "/adPrivacy";
++inline constexpr char kChromeUIAppServiceInternalsHost[] =
++    "app-service-internals";
++inline constexpr char kChromeUIAutofillMlInternalsHost[] =
++    "autofill-ml-internals";
++inline constexpr char kChromeUIBookmarksSidePanelHost[] =
++    "bookmarks-side-panel.top-chrome";
++inline constexpr char kChromeUIBookmarksSidePanelURL[] =
++    "chrome://bookmarks-side-panel.top-chrome/";
++inline constexpr char kChromeUICommentsSidePanelHost[] =
++    "comments-side-panel.top-chrome";
++inline constexpr char kChromeUICommentsSidePanelURL[] =
++    "chrome://comments-side-panel.top-chrome/";
++inline constexpr char kChromeUICustomizeChromeSidePanelHost[] =
++    "customize-chrome-side-panel.top-chrome";
++inline constexpr char kChromeUICustomizeChromeSidePanelURL[] =
++    "chrome://customize-chrome-side-panel.top-chrome";
++inline constexpr char kChromeUIHistorySidePanelHost[] =
++    "history-side-panel.top-chrome";
++inline constexpr char kChromeUIHistorySidePanelURL[] =
++    "chrome://history-side-panel.top-chrome/";
++inline constexpr char kChromeUIHistoryClustersSidePanelHost[] =
++    "history-clusters-side-panel.top-chrome";
++inline constexpr char kChromeUIHistoryClustersSidePanelURL[] =
++    "chrome://history-clusters-side-panel.top-chrome/";
++inline constexpr char kChromeUILensHost[] = "lens";
++inline constexpr char kChromeUILensSidePanelHost[] = "lens";
++inline constexpr char kChromeUILensUntrustedSidePanelAPIURL[] =
++    "chrome-untrusted://lens/side_panel/side_panel.html";
++inline constexpr char kChromeUILensUntrustedSidePanelURL[] =
++    "chrome-untrusted://lens/";
++inline constexpr char kChromeUILensOverlayHost[] = "lens-overlay";
++inline constexpr char kChromeUILensOverlayUntrustedURL[] =
++    "chrome-untrusted://lens-overlay/";
++inline constexpr char kChromeUINearbyInternalsHost[] = "nearby-internals";
++inline constexpr char kChromeUINearbyShareHost[] = "nearby";
++inline constexpr char kChromeUINearbyShareURL[] = "chrome://nearby/";
++inline constexpr char kChromeUIOnDeviceInternalsHost[] = "on-device-internals";
++inline constexpr char kChromeUIReadLaterHost[] = "read-later.top-chrome";
++inline constexpr char kChromeUIReadLaterURL[] =
++    "chrome://read-later.top-chrome/";
++inline constexpr char kChromeUISearchEngineChoiceHost[] =
++    "search-engine-choice";
++inline constexpr char kChromeUISearchEngineChoiceURL[] =
++    "chrome://search-engine-choice";
++inline constexpr char kChromeUITabSearchHost[] = "tab-search.top-chrome";
++inline constexpr char kChromeUITabSearchURL[] =
++    "chrome://tab-search.top-chrome/";
++inline constexpr char kChromeUIUntrustedFeedURL[] = "chrome-untrusted://feed/";
++inline constexpr char kChromeUIUntrustedReadAnythingSidePanelHost[] =
++    "read-anything-side-panel.top-chrome";
++inline constexpr char kChromeUIUntrustedReadAnythingSidePanelURL[] =
++    "chrome-untrusted://read-anything-side-panel.top-chrome/";
++inline constexpr char kChromeUIWebAppInternalsHost[] = "web-app-internals";
++inline constexpr char kChromeUIWebuiBrowserHost[] = "webui-browser";
++inline constexpr char kChromeUIWebuiBrowserURL[] = "chrome://webui-browser/";
++inline constexpr char kChromeUIWebUIJsErrorHost[] = "webuijserror";
++inline constexpr char kChromeUIWebUIJsErrorURL[] = "chrome://webuijserror/";
++inline constexpr char kCookiesSubPagePath[] = "/cookies";
++inline constexpr char kTrackingProtectionSubPagePath[] = "/trackingProtection";
++#endif  // BUILDFLAG(IS_ANDROID)
++
++#if BUILDFLAG(IS_CHROMEOS)
++// NOTE: If you add a URL/host please check if it should be added to
++// IsSystemWebUIHost().
++inline constexpr char kChromeUIAccountManagerErrorHost[] =
++    "account-manager-error";
++inline constexpr char kChromeUIAccountManagerErrorURL[] =
++    "chrome://account-manager-error";
++inline constexpr char kChromeUIAccountMigrationWelcomeHost[] =
++    "account-migration-welcome";
++inline constexpr char kChromeUIAccountMigrationWelcomeURL[] =
++    "chrome://account-migration-welcome";
++inline constexpr char kChromeUIAddSupervisionHost[] = "add-supervision";
++inline constexpr char kChromeUIAddSupervisionURL[] =
++    "chrome://add-supervision/";
++inline constexpr char kChromeUIAppDisabledHost[] = "app-disabled";
++inline constexpr char kChromeUIAppInstallDialogHost[] = "app-install-dialog";
++inline constexpr char kChromeUIAppInstallDialogURL[] =
++    "chrome://app-install-dialog/";
++inline constexpr char kChromeUIArcOverviewTracingHost[] =
++    "arc-overview-tracing";
++inline constexpr char kChromeUIArcPowerControlHost[] = "arc-power-control";
++inline constexpr char kChromeUIAudioHost[] = "audio";
++inline constexpr char kChromeUIAudioURL[] = "chrome://audio/";
++inline constexpr char kChromeUIBluetoothPairingHost[] = "bluetooth-pairing";
++inline constexpr char kChromeUIBluetoothPairingURL[] =
++    "chrome://bluetooth-pairing/";
++inline constexpr char kChromeUIBorealisCreditsHost[] = "borealis-credits";
++inline constexpr char kChromeUIBorealisInstallerHost[] = "borealis-installer";
++inline constexpr char kChromeUIBorealisInstallerUrl[] =
++    "chrome://borealis-installer";
++inline constexpr char kChromeUICloudUploadHost[] = "cloud-upload";
++inline constexpr char kChromeUICloudUploadURL[] = "chrome://cloud-upload/";
++inline constexpr char kChromeUIConfirmPasswordChangeHost[] =
++    "confirm-password-change";
++inline constexpr char kChromeUIConfirmPasswordChangeUrl[] =
++    "chrome://confirm-password-change";
++inline constexpr char kChromeUICrostiniCreditsHost[] = "crostini-credits";
++inline constexpr char16_t kChromeUICrostiniCreditsURL16[] =
++    u"chrome://crostini-credits/";
++inline constexpr char kChromeUICrostiniInstallerHost[] = "crostini-installer";
++inline constexpr char kChromeUICrostiniInstallerUrl[] =
++    "chrome://crostini-installer";
++inline constexpr char kChromeUICrostiniUpgraderHost[] = "crostini-upgrader";
++inline constexpr char kChromeUICrostiniUpgraderUrl[] =
++    "chrome://crostini-upgrader";
++inline constexpr char kChromeUICryptohomeHost[] = "cryptohome";
++inline constexpr char kChromeUIDeviceEmulatorHost[] = "device-emulator";
++inline constexpr char kChromeUIEmojiPickerHost[] = "emoji-picker";
++inline constexpr char kChromeUIEmojiPickerURL[] = "chrome://emoji-picker/";
++inline constexpr char kChromeUIEnterpriseReportingHost[] =
++    "enterprise-reporting";
++inline constexpr char kChromeUIExtendedUpdatesDialogHost[] =
++    "extended-updates-dialog";
++inline constexpr char kChromeUIExtendedUpdatesDialogURL[] =
++    "chrome://extended-updates-dialog";
++inline constexpr char kChromeUIHealthdInternalsHost[] = "healthd-internals";
++inline constexpr char kChromeUIInternetConfigDialogHost[] =
++    "internet-config-dialog";
++inline constexpr char kChromeUIInternetConfigDialogURL[] =
++    "chrome://internet-config-dialog/";
++inline constexpr char kChromeUIInternetDetailDialogHost[] =
++    "internet-detail-dialog";
++inline constexpr char kChromeUIInternetDetailDialogURL[] =
++    "chrome://internet-detail-dialog/";
++inline constexpr char kChromeUILocalFilesMigrationHost[] =
++    "local-files-migration";
++inline constexpr char kChromeUILocalFilesMigrationURL[] =
++    "chrome://local-files-migration/";
++inline constexpr char kChromeUILockScreenNetworkHost[] = "lock-network";
++inline constexpr char kChromeUILockScreenNetworkURL[] = "chrome://lock-network";
++inline constexpr char kChromeUILockScreenStartReauthHost[] = "lock-reauth";
++inline constexpr char kChromeUILockScreenStartReauthURL[] =
++    "chrome://lock-reauth";
++inline constexpr char kChromeUIManageMirrorSyncHost[] = "manage-mirrorsync";
++inline constexpr char kChromeUIManageMirrorSyncURL[] =
++    "chrome://manage-mirrorsync";
++inline constexpr char kChromeUIMobileSetupHost[] = "mobilesetup";
++inline constexpr char kChromeUIMobileSetupURL[] = "chrome://mobilesetup/";
++inline constexpr char kChromeUIMultiDeviceInternalsHost[] =
++    "multidevice-internals";
++inline constexpr char kChromeUIMultiDeviceSetupHost[] = "multidevice-setup";
++inline constexpr char kChromeUIMultiDeviceSetupUrl[] =
++    "chrome://multidevice-setup";
++inline constexpr char kChromeUINetworkHost[] = "network";
++inline constexpr char kChromeUINotificationTesterHost[] = "notification-tester";
++inline constexpr char kChromeUIOfficeFallbackHost[] = "office-fallback";
++inline constexpr char kChromeUIOfficeFallbackURL[] =
++    "chrome://office-fallback/";
++inline constexpr char kChromeUIOobeHost[] = "oobe";
++inline constexpr char kChromeUIOobeURL[] = "chrome://oobe/";
++inline constexpr char kChromeUIOSCreditsHost[] = "os-credits";
++inline constexpr char kChromeUIOSCreditsURL[] = "chrome://os-credits/";
++inline constexpr char16_t kChromeUIOSCreditsURL16[] = u"chrome://os-credits/";
++inline constexpr char kChromeUIParentAccessHost[] = "parent-access";
++inline constexpr char kChromeUIParentAccessURL[] = "chrome://parent-access/";
++inline constexpr char kChromeUIPasswordChangeHost[] = "password-change";
++inline constexpr char kChromeUIPasswordChangeUrl[] = "chrome://password-change";
++inline constexpr char kChromeUIPowerHost[] = "power";
++inline constexpr char kChromeUIRemoteManagementCurtainHost[] =
++    "security-curtain";
++inline constexpr char kChromeUISanitizeAppURL[] = "chrome://sanitize";
++inline constexpr char kChromeUISetTimeHost[] = "set-time";
++inline constexpr char kChromeUISetTimeURL[] = "chrome://set-time/";
++inline constexpr char kChromeUISlowHost[] = "slow";
++inline constexpr char kChromeUISlowTraceHost[] = "slow_trace";
++inline constexpr char kChromeUISlowURL[] = "chrome://slow/";
++inline constexpr char kChromeUISmbCredentialsHost[] = "smb-credentials-dialog";
++inline constexpr char kChromeUISmbCredentialsURL[] =
++    "chrome://smb-credentials-dialog/";
++inline constexpr char kChromeUISmbShareHost[] = "smb-share-dialog";
++inline constexpr char kChromeUISmbShareURL[] = "chrome://smb-share-dialog/";
++inline constexpr char kChromeUISysInternalsHost[] = "sys-internals";
++inline constexpr char kChromeUIUntrustedCroshHost[] = "crosh";
++inline constexpr char kChromeUIUntrustedCroshURL[] =
++    "chrome-untrusted://crosh/";
++inline constexpr char kChromeUIUntrustedTerminalHost[] = "terminal";
++inline constexpr char kChromeUIUntrustedTerminalURL[] =
++    "chrome-untrusted://terminal/";
++inline constexpr char kChromeUIUrgentPasswordExpiryNotificationHost[] =
++    "urgent-password-expiry-notification";
++inline constexpr char kChromeUIUrgentPasswordExpiryNotificationUrl[] =
++    "chrome://urgent-password-expiry-notification/";
++inline constexpr char kChromeUIUserImageHost[] = "userimage";
++inline constexpr char kChromeUIVmHost[] = "vm";
++
++// Returns true if this web UI is part of the "system UI". Generally this is
++// UI that opens in a window (not a browser tab) and that on other operating
++// systems would be considered part of the OS or window manager.
++bool IsSystemWebUIHost(std::string_view host);
++
++inline constexpr char kChromeUIAppDisabledURL[] = "chrome://app-disabled";
++inline constexpr char kChromeUIDlpInternalsHost[] = "dlp-internals";
++inline constexpr char kChromeUIHistogramsURL[] = "chrome://histograms";
++inline constexpr char kChromeUIKerberosInBrowserHost[] = "kerberos-in-browser";
++inline constexpr char kChromeUIKerberosInBrowserURL[] =
++    "chrome://kerberos-in-browser";
++inline constexpr char kChromeUILocationInternalsURL[] =
++    "chrome://location-internals";
++inline constexpr char kChromeUIOsFlagsAppURL[] = "chrome://flags/";
++inline constexpr char kChromeUIOSSettingsHost[] = "os-settings";
++inline constexpr char kChromeUIOSSettingsURL[] = "chrome://os-settings/";
++inline constexpr char kChromeUIOsUrlAppURL[] = "chrome://internal/";
++#endif  // BUILDFLAG(IS_CHROMEOS)
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
++    BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_DESKTOP_ANDROID)
++inline constexpr char kChromeUIDiscardsHost[] = "discards";
++inline constexpr char kChromeUIDiscardsURL[] = "chrome://discards/";
++#endif
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++inline constexpr char kChromeUIWebAppSettingsHost[] = "app-settings";
++inline constexpr char kChromeUIWebAppSettingsURL[] = "chrome://app-settings/";
++inline constexpr char kChromeUIWhatsNewHost[] = "whats-new";
++inline constexpr char kChromeUIWhatsNewURL[] = "chrome://whats-new/";
++#endif
++
++#if BUILDFLAG(IS_POSIX) && !BUILDFLAG(IS_MAC) && !BUILDFLAG(IS_ANDROID)
++inline constexpr char kChromeUILinuxProxyConfigHost[] = "linux-proxy-config";
++#endif
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || \
++    BUILDFLAG(IS_ANDROID)
++inline constexpr char kChromeUISandboxHost[] = "sandbox";
++#endif
++
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
++inline constexpr char kChromeUIBrowserSwitchHost[] = "browser-switch";
++inline constexpr char kChromeUIBrowserSwitchURL[] = "chrome://browser-switch/";
++inline constexpr char kChromeUIIntroDefaultBrowserSubPage[] = "default-browser";
++inline constexpr char kChromeUIIntroDefaultBrowserURL[] =
++    "chrome://intro/default-browser";
++inline constexpr char kChromeUIIntroHost[] = "intro";
++inline constexpr char kChromeUIIntroURL[] = "chrome://intro";
++inline constexpr char kChromeUIManagedUserProfileNoticeHost[] =
++    "managed-user-profile-notice";
++inline constexpr char kChromeUIManagedUserProfileNoticeUrl[] =
++    "chrome://managed-user-profile-notice/";
++inline constexpr char kChromeUIProfileCustomizationHost[] =
++    "profile-customization";
++inline constexpr char kChromeUIProfileCustomizationURL[] =
++    "chrome://profile-customization";
++inline constexpr char kChromeUIProfilePickerHost[] = "profile-picker";
++inline constexpr char kChromeUIProfilePickerStartupQuery[] = "startup";
++inline constexpr char kChromeUIProfilePickerGlicQuery[] = "glic";
++inline constexpr char kChromeUIProfilePickerUrl[] = "chrome://profile-picker/";
++inline constexpr char kChromeUIHistorySyncOptinHost[] = "history-sync-optin";
++inline constexpr char kChromeUIHistorySyncOptinURL[] =
++    "chrome://history-sync-optin/";
++#endif
++
++#if ((BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)) && \
++     defined(TOOLKIT_VIEWS)) ||                         \
++    defined(USE_AURA)
++inline constexpr char kChromeUITabModalConfirmDialogHost[] =
++    "tab-modal-confirm-dialog";
++#endif
++
++#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
++inline constexpr char kChromeUIPrintHost[] = "print";
++#endif
++
++#if BUILDFLAG(ENABLE_SESSION_SERVICE)
++inline constexpr char kChromeUISessionServiceInternalsPath[] =
++    "session-service";
++#endif
++
++#if BUILDFLAG(ENABLE_WEBUI_TAB_STRIP)
++inline constexpr char kChromeUITabStripHost[] = "tab-strip.top-chrome";
++inline constexpr char kChromeUITabStripURL[] = "chrome://tab-strip.top-chrome";
++#endif
++
++#if BUILDFLAG(ENTERPRISE_WATERMARK)
++inline constexpr char kChromeUIWatermarkHost[] = "watermark";
++inline constexpr char kChromeUIWatermarkURL[] = "chrome://watermark/";
++#endif
++
++#if BUILDFLAG(ENABLE_SESSION_SERVICE)
++inline constexpr char kChromeUITabStripInternalsHost[] = "tab-strip-internals";
++inline constexpr char kChromeUITabStripInternalsURL[] =
++    "chrome://tab-strip-internals";
++#endif
++
++// Settings sub-pages.
++//
++// NOTE: Add sub page paths to |kChromeSettingsSubPages| in
++// chrome_autocomplete_provider_client.cc to be listed by the built-in
++// AutocompleteProvider.
++
++inline constexpr char kAccessibilitySubPage[] = "accessibility";
++inline constexpr char kAddressesSubPage[] = "addresses";
++inline constexpr char kAdPrivacySubPage[] = "adPrivacy";
++inline constexpr char kAllSitesSettingsSubpage[] = "content/all";
++inline constexpr char kAppearanceSubPage[] = "appearance";
++inline constexpr char kAutofillSubPage[] = "autofill";
++inline constexpr char kAutofillAiSubPage[] = "enhancedAutofill";
++inline constexpr char kAutoPictureInPictureSubPage[] =
++    "content/autoPictureInPicture";
++inline constexpr char kClearBrowserDataSubPage[] = "clearBrowserData";
++inline constexpr char kContentSettingsSubPage[] = "content";
++inline constexpr char kCookieSettingsSubPage[] = "cookies";
++inline constexpr char kDefaultBrowserSubPage[] = "defaultBrowser";
++inline constexpr char kDownloadsSubPage[] = "downloads";
++inline constexpr char kExperimentalAISettingsSubPage[] = "ai";
++inline constexpr char kFileSystemSettingsSubpage[] =
++    "content/filesystem/siteDetails";
++inline constexpr char kFileSystemSubpage[] = "content/filesystem";
++inline constexpr char kGlicSettingsSubpage[] = "ai/gemini";
++inline constexpr char kGoogleServicesSubpage[] = "googleServices";
++inline constexpr char kHandlerSettingsSubPage[] = "handlers";
++inline constexpr char kHistorySearchSubpage[] = "ai/historySearch";
++inline constexpr char kImportDataSubPage[] = "importData";
++inline constexpr char kIncognitoSettingsSubPage[] = "incognito";
++inline constexpr char kLanguageOptionsSubPage[] = "languages";
++inline constexpr char kLanguagesSubPage[] = "languages/details";
++inline constexpr char kManageProfileSubPage[] = "manageProfile";
++inline constexpr char kAiHelpMeWriteSubpage[] = "ai/helpMeWrite";
++inline constexpr char kOnDeviceSiteDataSubpage[] = "content/siteData";
++inline constexpr char kOnStartupSubPage[] = "onStartup";
++inline constexpr char kPasskeysSubPage[] = "passkeys";
++inline constexpr char kPasswordCheckSubPage[] = "passwords/check?start=true";
++inline constexpr char kPasswordManagerSubPage[] = "passwords";
++inline constexpr char kPaymentsSubPage[] = "payments";
++inline constexpr char kPeopleSubPage[] = "people";
++inline constexpr char kPerformanceSubPage[] = "performance";
++inline constexpr char kPrintingSettingsSubPage[] = "printing";
++inline constexpr char kPrivacyGuideSubPage[] = "privacy/guide";
++inline constexpr char kPrivacySandboxMeasurementSubpage[] =
++    "adPrivacy/measurement";
++inline constexpr char kPrivacySubPage[] = "privacy";
++inline constexpr char kResetProfileSettingsSubPage[] = "resetProfileSettings";
++inline constexpr char kResetSubPage[] = "reset";
++inline constexpr char kSafeBrowsingEnhancedProtectionSubPage[] =
++    "security?q=enhanced";
++inline constexpr char kSafetyCheckSubPage[] = "safetyCheck";
++inline constexpr char kSafetyHubSubPage[] = "safetyCheck";
++inline constexpr char kSearchEnginesSubPage[] = "searchEngines";
++inline constexpr char kSearchSubPage[] = "search";
++inline constexpr char kSignOutSubPage[] = "signOut";
++inline constexpr char kSiteDetailsSubpage[] = "content/siteDetails";
++inline constexpr char kSyncSetupSubPage[] = "syncSetup";
++inline constexpr char kSyncSetupAdvancedSubPage[] = "syncSetup/advanced";
++inline constexpr char kTriggeredResetProfileSettingsSubPage[] =
++    "triggeredResetProfileSettings";
++
++#if BUILDFLAG(IS_WIN)
++inline constexpr char kCleanupSubPage[] = "cleanup";
++#endif
++
++#if !BUILDFLAG(IS_ANDROID) && BUILDFLAG(GOOGLE_CHROME_BRANDING)
++inline constexpr char kChromeUICastFeedbackHost[] = "cast-feedback";
++inline constexpr char kChromeUICastFeedbackURL[] = "chrome://cast-feedback";
++#endif
++
++#if BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)
++inline constexpr char kChromeUICertificateManagerDialogURL[] =
++    "chrome://certificate-manager";
++inline constexpr char kChromeUICertificateManagerHost[] = "certificate-manager";
++inline constexpr char kChromeUICertificateRedirectPath[] = "/certificates";
++inline constexpr char kChromeUICertificateRedirectURL[] =
++    "chrome://settings/certificates";
++#endif  // BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)
++
++// Extensions sub pages.
++inline constexpr char kExtensionConfigureCommandsSubPage[] =
++    "configureCommands";
++
++// Gets the hosts/domains that are shown in chrome://chrome-urls.
++base::span<const base::cstring_view> ChromeURLHosts();
++
++// Gets the URL strings of "debug" pages which are dangerous and not for general
++// consumption.
++base::span<const base::cstring_view> ChromeDebugURLs();
++
++}  // namespace chrome
++
++#endif  // CHROME_COMMON_WEBUI_URL_CONSTANTS_H_
+diff --git a/patches/series b/patches/series
+index 294a8da..fbc2f13 100644
+--- a/patches/series
++++ b/patches/series
+@@ -9,3 +9,5 @@ ungoogled-chromium/macos/fix-dsymutil.patch
+ ungoogled-chromium/macos/no-unknown-warnings.patch
+ ungoogled-chromium/macos/build-bindgen-target-override.patch
+ ungoogled-chromium/macos/bindgen-disable-static.patch
++ungoogled-chromium/disable-rust-version-check.patch
++ungoogled-chromium/base-branding-strings.patch
+diff --git a/patches/ungoogled-chromium/disable-rust-version-check.patch b/patches/ungoogled-chromium/disable-rust-version-check.patch
+new file mode 100644
+index 0000000..368bb19
+--- /dev/null
++++ b/patches/ungoogled-chromium/disable-rust-version-check.patch
+@@ -0,0 +1,23 @@
++--- a/build/config/compiler/BUILD.gn
+++++ b/build/config/compiler/BUILD.gn
++@@ -1811,12 +1811,14 @@
++       _py_revision = string_replace(_py_revision, "'", "")
++       _py_subrevision =
++           string_replace(_rust_revision_lines[1], "RUST_SUB_REVISION = ", "")
++-      _expected_rust_revision = "$_py_revision-$_py_subrevision"
+++      # DISABLED for custom toolchain extraction
+++      # _expected_rust_revision = "$_py_revision-$_py_subrevision"
++
++       # Ensure the rust version matches the clang version.
++-      assert(
++-          filter_include([ rustc_revision ],
++-                         [ "*-$_expected_rust_revision-*" ]) != [],
++-          "rustc_revision=\"$rustc_revision\" but update_rust.py expected \"$_expected_rust_revision\". Run \"gclient sync\"?")
+++      # DISABLED for custom toolchain extraction
+++      # assert(
+++      #     filter_include([ rustc_revision ],
+++      #                    [ "*-$_expected_rust_revision-*" ]) != [],
+++      #     "rustc_revision=\"$rustc_revision\" but update_rust.py expected \"$_expected_rust_revision\". Run \"gclient sync\"?")
++     }
++
++     # This is here so that all files get recompiled after a clang roll and
