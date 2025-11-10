@@ -1,0 +1,277 @@
+From 2b47fc5763888008d4497d7fbd72c8ecebda1f9a Mon Sep 17 00:00:00 2001
+From: Flakerim Ismani <flakerimi@gmail.com>
+Date: Mon, 10 Nov 2025 15:22:15 +0100
+Subject: [PATCH] Add Test sidepanel with tab strip button - minimal
+ implementation
+
+---
+ chrome/browser/ui/BUILD.gn                    |  2 +
+ .../ui/views/frame/tab_strip_region_view.cc   |  9 ++++
+ .../ui/views/frame/tab_strip_region_view.h    |  2 +
+ .../side_panel/basedev_test_coordinator.cc    | 28 +++++++++++++
+ .../side_panel/basedev_test_coordinator.h     | 24 +++++++++++
+ .../ui/views/tabs/basedev_test_button.cc      | 41 +++++++++++++++++++
+ .../ui/views/tabs/basedev_test_button.h       | 27 ++++++++++++
+ .../webui/side_panel/basedev_test/test_ui.cc  | 14 +++++++
+ .../webui/side_panel/basedev_test/test_ui.h   | 13 ++++++
+ 9 files changed, 160 insertions(+)
+ create mode 100644 chrome/browser/ui/views/side_panel/basedev_test_coordinator.cc
+ create mode 100644 chrome/browser/ui/views/side_panel/basedev_test_coordinator.h
+ create mode 100644 chrome/browser/ui/views/tabs/basedev_test_button.cc
+ create mode 100644 chrome/browser/ui/views/tabs/basedev_test_button.h
+ create mode 100644 chrome/browser/ui/webui/side_panel/basedev_test/test_ui.cc
+ create mode 100644 chrome/browser/ui/webui/side_panel/basedev_test/test_ui.h
+
+diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
+index f4531197ae..220ccea5d8 100644
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -4380,6 +4380,8 @@ static_library("ui") {
+       "views/tabs/tab_scrolling_animation.cc",
+       "views/tabs/tab_scrolling_animation.h",
+       "views/tabs/tab_search_button.cc",
++    "views/tabs/basedev_test_button.cc",
++    "views/tabs/basedev_test_button.h",
+       "views/tabs/tab_search_button.h",
+       "views/tabs/tab_search_container.cc",
+       "views/tabs/tab_search_container.h",
+diff --git a/chrome/browser/ui/views/frame/tab_strip_region_view.cc b/chrome/browser/ui/views/frame/tab_strip_region_view.cc
+index 2ddd492fab..5aa196009e 100644
+--- a/chrome/browser/ui/views/frame/tab_strip_region_view.cc
++++ b/chrome/browser/ui/views/frame/tab_strip_region_view.cc
+@@ -30,6 +30,7 @@
+ #include "chrome/browser/ui/views/tabs/new_tab_button.h"
+ #include "chrome/browser/ui/views/tabs/tab_search_button.h"
+ #include "chrome/browser/ui/views/tabs/tab_search_container.h"
++#include "chrome/browser/ui/views/tabs/basedev_test_button.h"
+ #include "chrome/browser/ui/views/tabs/tab_strip.h"
+ #include "chrome/browser/ui/views/tabs/tab_strip_action_container.h"
+ #include "chrome/browser/ui/views/tabs/tab_strip_control_button.h"
+@@ -218,6 +219,11 @@ TabStripRegionView::TabStripRegionView(std::unique_ptr<TabStrip> tab_strip)
+ 
+       tab_strip_action_container->SetProperty(views::kCrossAxisAlignmentKey,
+                                               views::LayoutAlignment::kStart);
++
++      // BaseDev: Add Test panel toggle button
++      auto basedev_test_btn = std::make_unique<BaseDevTestButton>(
++          tab_strip_->controller(), browser, Edge::kNone, Edge::kNone);
++      basedev_test_button_ = AddChildView(std::move(basedev_test_btn));
+     } else {
+       tab_search_container = std::make_unique<TabSearchContainer>(
+           tab_strip_->controller(), browser->GetTabStripModel(),
+@@ -342,6 +348,9 @@ TabStripRegionView::~TabStripRegionView() {
+   if (tab_strip_action_container_) {
+     RemoveChildViewT(std::exchange(tab_strip_action_container_, nullptr));
+   }
++  if (basedev_test_button_) {
++    RemoveChildViewT(std::exchange(basedev_test_button_, nullptr));
++  }
+   if (new_tab_button_) {
+     RemoveChildViewT(std::exchange(new_tab_button_, nullptr));
+   }
+diff --git a/chrome/browser/ui/views/frame/tab_strip_region_view.h b/chrome/browser/ui/views/frame/tab_strip_region_view.h
+index 6f94981585..e69cc992fc 100644
+--- a/chrome/browser/ui/views/frame/tab_strip_region_view.h
++++ b/chrome/browser/ui/views/frame/tab_strip_region_view.h
+@@ -21,6 +21,7 @@ class Button;
+ class NewTabButton;
+ class TabStripActionContainer;
+ class TabSearchButton;
++class BaseDevTestButton;
+ class TabStrip;
+ class TabStripScrollContainer;
+ class ProductSpecificationsButton;
+@@ -144,6 +145,7 @@ class TabStripRegionView final : public TabStripViewInterface {
+   raw_ptr<views::Button> new_tab_button_ = nullptr;
+   raw_ptr<TabSearchContainer> tab_search_container_ = nullptr;
+   raw_ptr<ProductSpecificationsButton> product_specifications_button_ = nullptr;
++  raw_ptr<BaseDevTestButton> basedev_test_button_ = nullptr;
+ 
+   // On some platforms for Chrome Refresh, the TabSearchButton should be
+   // laid out before the TabStrip. Storing this configuration prevents
+diff --git a/chrome/browser/ui/views/side_panel/basedev_test_coordinator.cc b/chrome/browser/ui/views/side_panel/basedev_test_coordinator.cc
+new file mode 100644
+index 0000000000..09f529c46d
+--- /dev/null
++++ b/chrome/browser/ui/views/side_panel/basedev_test_coordinator.cc
+@@ -0,0 +1,28 @@
++// Copyright 2025 The Chromium Authors
++#include "chrome/browser/ui/views/side_panel/basedev_test_coordinator.h"
++
++#include "chrome/browser/ui/browser.h"
++#include "chrome/browser/ui/views/frame/browser_view.h"
++#include "chrome/browser/ui/views/side_panel/side_panel_coordinator.h"
++#include "chrome/browser/ui/views/side_panel/side_panel_entry.h"
++
++BaseDevTestCoordinator::BaseDevTestCoordinator(Browser* browser)
++    : browser_(browser) {}
++
++BaseDevTestCoordinator::~BaseDevTestCoordinator() = default;
++
++BROWSER_USER_DATA_KEY_IMPL(BaseDevTestCoordinator)
++
++void BaseDevTestCoordinator::Toggle() {
++  auto* browser_view = BrowserView::GetBrowserViewForBrowser(browser_);
++  if (!browser_view) return;
++
++  auto* coordinator = browser_view->side_panel_coordinator();
++  if (!coordinator) return;
++
++  if (coordinator->IsSidePanelShowing()) {
++    coordinator->Close();
++  } else {
++    coordinator->Show();
++  }
++}
+diff --git a/chrome/browser/ui/views/side_panel/basedev_test_coordinator.h b/chrome/browser/ui/views/side_panel/basedev_test_coordinator.h
+new file mode 100644
+index 0000000000..1bd2eefc4c
+--- /dev/null
++++ b/chrome/browser/ui/views/side_panel/basedev_test_coordinator.h
+@@ -0,0 +1,24 @@
++// Copyright 2025 The Chromium Authors
++#ifndef CHROME_BROWSER_UI_VIEWS_SIDE_PANEL_BASEDEV_TEST_COORDINATOR_H_
++#define CHROME_BROWSER_UI_VIEWS_SIDE_PANEL_BASEDEV_TEST_COORDINATOR_H_
++
++#include "base/memory/raw_ptr.h"
++#include "chrome/browser/ui/browser_user_data.h"
++
++class Browser;
++
++class BaseDevTestCoordinator
++    : public BrowserUserData<BaseDevTestCoordinator> {
++ public:
++  explicit BaseDevTestCoordinator(Browser* browser);
++  ~BaseDevTestCoordinator() override;
++
++  void Toggle();
++
++ private:
++  friend class BrowserUserData<BaseDevTestCoordinator>;
++  raw_ptr<Browser> browser_;
++  BROWSER_USER_DATA_KEY_DECL();
++};
++
++#endif
+diff --git a/chrome/browser/ui/views/tabs/basedev_test_button.cc b/chrome/browser/ui/views/tabs/basedev_test_button.cc
+new file mode 100644
+index 0000000000..aba67848db
+--- /dev/null
++++ b/chrome/browser/ui/views/tabs/basedev_test_button.cc
+@@ -0,0 +1,41 @@
++// Copyright 2025 The Chromium Authors
++#include "chrome/browser/ui/views/tabs/basedev_test_button.h"
++
++#include "chrome/app/vector_icons/vector_icons.h"
++#include "chrome/browser/ui/browser.h"
++#include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
++#include "chrome/browser/ui/views/side_panel/basedev_test_coordinator.h"
++#include "ui/base/metadata/metadata_impl_macros.h"
++
++BaseDevTestButton::BaseDevTestButton(
++    TabStripController* controller,
++    BrowserWindowInterface* browser_window_interface,
++    Edge fixed_edge,
++    Edge animated_edge)
++    : TabStripControlButton(controller,
++                            PressedCallback(),
++                            vector_icons::kSmartButtonIcon,
++                            fixed_edge,
++                            animated_edge),
++      browser_window_interface_(browser_window_interface) {
++  SetTooltipText(u"Test Panel");
++  GetViewAccessibility().SetName(u"Test");
++}
++
++BaseDevTestButton::~BaseDevTestButton() = default;
++
++void BaseDevTestButton::NotifyClick(const ui::Event& event) {
++  TabStripControlButton::NotifyClick(event);
++  if (!browser_window_interface_) return;
++
++  Browser* browser = browser_window_interface_->GetBrowser();
++  if (!browser) return;
++
++  auto* coordinator = BaseDevTestCoordinator::FromBrowser(browser);
++  if (coordinator) {
++    coordinator->Toggle();
++  }
++}
++
++BEGIN_METADATA(BaseDevTestButton)
++END_METADATA
+diff --git a/chrome/browser/ui/views/tabs/basedev_test_button.h b/chrome/browser/ui/views/tabs/basedev_test_button.h
+new file mode 100644
+index 0000000000..f721cabf8a
+--- /dev/null
++++ b/chrome/browser/ui/views/tabs/basedev_test_button.h
+@@ -0,0 +1,27 @@
++// Copyright 2025 The Chromium Authors
++#ifndef CHROME_BROWSER_UI_VIEWS_TABS_BASEDEV_TEST_BUTTON_H_
++#define CHROME_BROWSER_UI_VIEWS_TABS_BASEDEV_TEST_BUTTON_H_
++
++#include "base/memory/raw_ptr.h"
++#include "chrome/browser/ui/views/tabs/tab_strip_control_button.h"
++
++class BrowserWindowInterface;
++class TabStripController;
++
++class BaseDevTestButton : public TabStripControlButton {
++  METADATA_HEADER(BaseDevTestButton, TabStripControlButton)
++
++ public:
++  BaseDevTestButton(TabStripController* controller,
++                    BrowserWindowInterface* browser_window_interface,
++                    Edge fixed_edge,
++                    Edge animated_edge);
++  ~BaseDevTestButton() override;
++
++  void NotifyClick(const ui::Event& event) override;
++
++ private:
++  raw_ptr<BrowserWindowInterface> browser_window_interface_;
++};
++
++#endif
+diff --git a/chrome/browser/ui/webui/side_panel/basedev_test/test_ui.cc b/chrome/browser/ui/webui/side_panel/basedev_test/test_ui.cc
+new file mode 100644
+index 0000000000..1197bb1c1d
+--- /dev/null
++++ b/chrome/browser/ui/webui/side_panel/basedev_test/test_ui.cc
+@@ -0,0 +1,14 @@
++// Copyright 2025 The Chromium Authors
++#include "chrome/browser/ui/webui/side_panel/basedev_test/test_ui.h"
++
++#include "content/public/browser/web_ui_data_source.h"
++
++BaseDevTestUI::BaseDevTestUI(content::WebUI* web_ui)
++    : content::WebUIController(web_ui) {
++  // Minimal WebUI - just a placeholder
++  content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
++      web_ui->GetWebContents()->GetBrowserContext(), "basedev-test");
++  source->SetDefaultResource(IDR_ABOUT_UI_HTML);
++}
++
++BaseDevTestUI::~BaseDevTestUI() = default;
+diff --git a/chrome/browser/ui/webui/side_panel/basedev_test/test_ui.h b/chrome/browser/ui/webui/side_panel/basedev_test/test_ui.h
+new file mode 100644
+index 0000000000..65ca640a01
+--- /dev/null
++++ b/chrome/browser/ui/webui/side_panel/basedev_test/test_ui.h
+@@ -0,0 +1,13 @@
++// Copyright 2025 The Chromium Authors
++#ifndef CHROME_BROWSER_UI_WEBUI_SIDE_PANEL_BASEDEV_TEST_UI_H_
++#define CHROME_BROWSER_UI_WEBUI_SIDE_PANEL_BASEDEV_TEST_UI_H_
++
++#include "content/public/browser/web_ui_controller.h"
++
++class BaseDevTestUI : public content::WebUIController {
++ public:
++  explicit BaseDevTestUI(content::WebUI* web_ui);
++  ~BaseDevTestUI() override;
++};
++
++#endif
+-- 
+2.50.1 (Apple Git-155)
+

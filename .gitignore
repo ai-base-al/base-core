@@ -1,11 +1,10 @@
-# Build outputs (ungoogled-chromium)
-build/src/
-build/download_cache/
-build/*.dmg
+# Source directory (14GB Chromium source, not committed)
+src/
+
+# Build outputs
 out/
 
 # Logs directory
-logs/
 *.log
 
 # Node modules
@@ -61,10 +60,9 @@ depot_tools/
 # Backup directories
 base_src.backup/
 patches.backup/
+backups/
 
-# Binaries directory (versioned builds saved to disk, not committed)
-binaries/
-.temp_bin/
+# Application bundles and packages
 *.app
 *.dmg
 *.icns
