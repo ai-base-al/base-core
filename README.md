@@ -9,19 +9,22 @@ This repository uses a Brave/Edge-style structure where ungoogled-chromium is ke
 ```
 /Volumes/External/BaseChrome/
 ├── ungoogled-chromium/          # Upstream repository (separate)
+│   └── build/src/              # Chromium source (stays here permanently!)
 └── base-core/                   # This repository
-    ├── src/                     # Chromium source (14GB, not in git)
+    ├── src -> ../ungoogled-chromium/build/src  # Symlink to source
     ├── patches/                 # Base Dev custom patches
     │   ├── series              # Patch application order
     │   └── *.patch             # Individual patch files
     ├── scripts/                # Build and development scripts
-    │   ├── init.sh            # Initial setup (run once)
+    │   ├── clone.sh           # Clone Chromium (run once)
+    │   ├── init.sh            # Full setup workflow
     │   ├── build.sh           # Incremental build (10-30 min)
     │   ├── patch.sh           # Apply patches only
     │   └── sync.sh            # Update ungoogled-chromium
     ├── tools/                  # Development tools
     ├── branding/              # Base Dev branding assets
     ├── backups/               # Built browser backups
+    ├── logs/                  # Build logs
     └── guides/                # Development documentation
 ```
 
@@ -77,10 +80,18 @@ This will:
 
 | Script | Purpose | Time | When to Use |
 |--------|---------|------|-------------|
-| `init.sh` | Initial setup | 2-4 hours | First time setup only |
+| `clone.sh` | Clone Chromium source | 30-60 min | First time only (never again!) |
+| `init.sh` | Full build workflow | 2-4 hours | First time or complete rebuild |
 | `build.sh` | Incremental build | 10-30 min | Daily development (most common) |
 | `patch.sh` | Apply patches only | <1 min | After editing patches |
 | `sync.sh` | Update Chromium | 2-4 hours | Monthly/when updating upstream |
+
+All build scripts automatically log output to `logs/build.log`. Monitor progress:
+```bash
+tail -f logs/build.log
+```
+
+**Important**: Source code stays in `ungoogled-chromium/build/src` permanently. The `src/` directory is just a symlink. This prevents re-cloning on future builds!
 
 ## Creating Custom Features
 
@@ -154,12 +165,13 @@ Comprehensive guides are available in the `guides/` directory:
 
 ## Directory Details
 
-### `src/` - Chromium Source (14GB, not in git)
+### `src/` - Symlink to Source
 
-Full Chromium source code with ungoogled-chromium and Base Dev patches applied.
+Symlink to `ungoogled-chromium/build/src` for convenience. Source stays in ungoogled-chromium to prevent re-cloning.
 
+Actual source location:
 ```
-src/
+ungoogled-chromium/build/src/
 ├── chrome/              # Chrome browser implementation
 ├── components/          # Reusable components
 ├── content/            # Content layer
@@ -184,9 +196,10 @@ patches/
 Built browser binaries saved for quick restoration:
 
 ```bash
-# Backups are created automatically by sync.sh
 backups/
-└── Base-Dev-20251110-143022.app
+├── Releases/                    # Release builds
+│   └── Base Dev.app            # Latest working build
+└── ungoogled-chromium_*.dmg    # DMG archives
 ```
 
 ### `tools/` - Development Tools
@@ -286,10 +299,12 @@ cd src
 
 These are intentionally not tracked in git (see `.gitignore`):
 
-- `src/` - 14GB Chromium source
+- `src/` - Symlink to ungoogled-chromium/build/src
+- `logs/` - Build logs
 - `backups/` - Built browser binaries
-- `*.log` - Build logs
 - `*.app` - Application bundles
+
+Note: The actual Chromium source (14GB) lives in `ungoogled-chromium/build/src` and is managed by ungoogled-chromium's build system.
 
 ## Getting Help
 

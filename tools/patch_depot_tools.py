@@ -81,7 +81,7 @@ def patch_gclient_eval(depot_tools_path):
         return False
 
 def patch_all_python_shebangs(depot_tools_path):
-    """Change all Python shebangs to use python3.11"""
+    """Change all Python shebangs to use python3.13"""
 
     print(f"Patching Python shebangs in {depot_tools_path}...")
 
@@ -95,7 +95,7 @@ def patch_all_python_shebangs(depot_tools_path):
                         first_line = f.readline()
                         if first_line.startswith('#!') and 'python' in first_line:
                             content = first_line + f.read()
-                            new_first_line = '#!/usr/bin/env python3.11\n'
+                            new_first_line = '#!/usr/bin/env python3.13\n'
                             if first_line != new_first_line:
                                 new_content = new_first_line + content[len(first_line):]
                                 with open(filepath, 'w') as f:
@@ -104,7 +104,7 @@ def patch_all_python_shebangs(depot_tools_path):
                 except:
                     pass
 
-    print(f"  Updated {count} files to use python3.11")
+    print(f"  Updated {count} files to use python3.13")
     return count > 0
 
 def main():

@@ -9,8 +9,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_CORE_DIR="$(dirname "$SCRIPT_DIR")"
 SRC_DIR="$BASE_CORE_DIR/src"
 OUT_DIR="$SRC_DIR/out/Default"
+LOGS_DIR="$BASE_CORE_DIR/logs"
+LOG_FILE="$LOGS_DIR/build.log"
+
+# Create logs directory if it doesn't exist
+mkdir -p "$LOGS_DIR"
 
 echo "Base Dev - Incremental Build"
+echo "Log file: $LOG_FILE"
 echo "=============================="
 echo ""
 echo "Source directory: $SRC_DIR"
@@ -39,10 +45,11 @@ echo "Starting incremental build..."
 echo "This will take 10-30 minutes depending on changes"
 echo ""
 
-ninja -C out/Default chrome
+ninja -C out/Default chrome 2>&1 | tee "$LOG_FILE"
 
 echo ""
 echo "Build completed successfully!"
+echo "Log saved to: $LOG_FILE"
 echo "Binary location: $OUT_DIR/Base Dev.app"
 echo ""
 echo "To run the browser:"

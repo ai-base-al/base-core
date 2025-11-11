@@ -4,13 +4,20 @@
 # Run this only once or when setting up a new development machine
 
 set -e
+set -o pipefail  # Make pipeline errors propagate correctly
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_CORE_DIR="$(dirname "$SCRIPT_DIR")"
 UNGOOGLED_DIR="$(dirname "$BASE_CORE_DIR")/ungoogled-chromium"
 SRC_DIR="$BASE_CORE_DIR/src"
+LOGS_DIR="$BASE_CORE_DIR/logs"
+LOG_FILE="$LOGS_DIR/build.log"
+
+# Create logs directory if it doesn't exist
+mkdir -p "$LOGS_DIR"
 
 echo "Base Dev - Initial Setup"
+echo "Log file: $LOG_FILE"
 echo "========================"
 echo ""
 echo "This will set up a complete build environment"
@@ -46,52 +53,80 @@ if [ -d "$SRC_DIR" ]; then
   fi
 fi
 
-echo "Step 1: Running ungoogled-chromium build script"
-echo "This will:"
-echo "  - Clone Chromium source (~10 GB)"
-echo "  - Download build dependencies (~2 GB)"
-echo "  - Apply ungoogled-chromium patches"
-echo "  - Configure build system"
-echo "  - Build Chromium (2-4 hours)"
+echo "Step 1: Checking/cloning Chromium source"
+if [ ! -d "$UNGOOGLED_DIR/build/src/.git" ]; then
+  echo "Source not found, running clone script..."
+  "$SCRIPT_DIR/clone.sh" 2>&1 | tee -a "$LOG_FILE"
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Clone failed"
+    exit 1
+  fi
+else
+  echo "Source already exists at $UNGOOGLED_DIR/build/src"
+
+  # Ensure symlink exists
+  if [ ! -L "$SRC_DIR" ]; then
+    echo "Creating symlink: $SRC_DIR -> $UNGOOGLED_DIR/build/src"
+    ln -s "$UNGOOGLED_DIR/build/src" "$SRC_DIR"
+  fi
+fi
+echo ""
+
+echo "Step 2: Building ungoogled-chromium"
+echo "Using -d flag to skip re-clone (just fetch updates)"
+echo "This will take 2-4 hours..."
 echo ""
 
 cd "$UNGOOGLED_DIR"
-./build.sh
+export PYTHON=python3.13
+./build.sh -d 2>&1 | tee -a "$LOG_FILE"
+BUILD_EXIT=$?
 
-echo ""
-echo "Step 2: Moving built source to base-core"
-BUILD_SRC="$UNGOOGLED_DIR/build/src"
-if [ -d "$BUILD_SRC" ]; then
-  echo "Moving $BUILD_SRC to $SRC_DIR..."
-  mv "$BUILD_SRC" "$SRC_DIR"
-else
-  echo "Error: Build source not found at $BUILD_SRC"
-  echo "ungoogled-chromium build may have failed"
+if [ $BUILD_EXIT -ne 0 ]; then
+  echo ""
+  echo "ERROR: ungoogled-chromium build failed with exit code $BUILD_EXIT"
+  echo "Check logs/build.log for details"
   exit 1
 fi
+
+BUILD_SRC="$UNGOOGLED_DIR/build/src"
+echo "Build completed at: $BUILD_SRC"
 
 echo ""
 echo "Step 3: Applying Base Dev patches"
 cd "$BASE_CORE_DIR"
 ./scripts/patch.sh
+if [ $? -ne 0 ]; then
+  echo "ERROR: Patch application failed"
+  exit 1
+fi
 
 echo ""
 echo "Step 4: Rebuilding with Base Dev patches"
 ./scripts/build.sh
+if [ $? -ne 0 ]; then
+  echo "ERROR: Build failed"
+  exit 1
+fi
 
 echo ""
 echo "=========================================="
 echo "Initial setup complete!"
 echo "=========================================="
 echo ""
-echo "Browser location: $SRC_DIR/out/Default/Base Dev.app"
+echo "Source location: $BUILD_SRC"
+echo "Symlink: $SRC_DIR -> $BUILD_SRC"
+echo "Browser location: $BUILD_SRC/out/Default/Base Dev.app"
 echo ""
 echo "To run the browser:"
-echo "  open \"$SRC_DIR/out/Default/Base Dev.app\""
+echo "  open \"$BUILD_SRC/out/Default/Base Dev.app\""
 echo ""
 echo "For daily development:"
-echo "  - Make your changes to source files in src/"
+echo "  - Make your changes to source files in $BUILD_SRC"
 echo "  - Run ./scripts/build.sh for incremental builds (10-30 min)"
 echo ""
 echo "To update ungoogled-chromium:"
-echo "  - Run ./scripts/sync.sh (triggers full rebuild)"
+echo "  - Run ./scripts/sync.sh (will fetch updates, not re-clone)"
+echo ""
+echo "Note: Source code stays in ungoogled-chromium/build/src permanently"
+echo "      This prevents re-cloning on future builds!"

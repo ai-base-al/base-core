@@ -10,15 +10,22 @@ BASE_CORE_DIR="$(dirname "$SCRIPT_DIR")"
 UNGOOGLED_DIR="$(dirname "$BASE_CORE_DIR")/ungoogled-chromium"
 SRC_DIR="$BASE_CORE_DIR/src"
 BACKUP_DIR="$BASE_CORE_DIR/backups"
+LOGS_DIR="$BASE_CORE_DIR/logs"
+LOG_FILE="$LOGS_DIR/build.log"
+
+# Create logs directory if it doesn't exist
+mkdir -p "$LOGS_DIR"
 
 echo "Base Dev - Sync ungoogled-chromium"
+echo "Log file: $LOG_FILE"
 echo "==================================="
 echo ""
 echo "This will:"
 echo "  1. Backup current build"
-echo "  2. Update ungoogled-chromium"
-echo "  3. Perform full rebuild (2-4 hours)"
-echo "  4. Apply Base Dev patches"
+echo "  2. Check Python 3.13"
+echo "  3. Update ungoogled-chromium"
+echo "  4. Perform full rebuild (2-4 hours)"
+echo "  5. Apply Base Dev patches"
 echo ""
 echo "ungoogled-chromium directory: $UNGOOGLED_DIR"
 echo ""
@@ -60,7 +67,21 @@ else
 fi
 
 echo ""
-echo "Step 2: Updating ungoogled-chromium"
+echo "Step 2: Checking Python 3.13 installation"
+if ! command -v python3.13 &> /dev/null; then
+  echo "Python 3.13 not found. Installing via Homebrew..."
+  if ! command -v brew &> /dev/null; then
+    echo "Error: Homebrew not found. Please install Homebrew first:"
+    echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    exit 1
+  fi
+  brew install python@3.13
+else
+  echo "Python 3.13 found: $(python3.13 --version)"
+fi
+
+echo ""
+echo "Step 3: Updating ungoogled-chromium"
 cd "$UNGOOGLED_DIR"
 
 # Pull latest changes
@@ -74,9 +95,12 @@ if [ -d "build" ]; then
 fi
 
 echo ""
-echo "Step 3: Building with updated ungoogled-chromium"
+echo "Step 4: Building with updated ungoogled-chromium"
 echo "This will take 2-4 hours..."
-./build.sh
+echo "Note: Using -d flag to skip re-cloning (will fetch updates only)"
+# Force use of Python 3.13 to avoid Python 3.14 compatibility issues
+export PYTHON=python3.13
+./build.sh -d 2>&1 | tee -a "$LOG_FILE"
 
 echo ""
 echo "Step 4: Moving built source to base-core"
