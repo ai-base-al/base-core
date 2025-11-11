@@ -1,0 +1,27 @@
+{
+  "current": {
+    "version": "1.0.0",
+    "codename": "Foundation",
+    "release_date": "2025-11-11",
+    "chromium_base": "142.0.7444.134",
+    "build_number": 1,
+    "channel": "stable"
+  },
+  "history": [
+    {
+      "version": "1.0.0",
+      "codename": "Foundation",
+      "release_date": "2025-11-11",
+      "chromium_base": "142.0.7444.134",
+      "build_number": 1,
+      "channel": "stable",
+      "notes": "Initial BaseOne release with complete branding system"
+    }
+  ],
+  "channels": {
+    "stable": "1.0.0",
+    "beta": null,
+    "dev": null,
+    "canary": null
+  }
+}
