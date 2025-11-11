@@ -24,6 +24,7 @@ CHROMIUM_VERSION="142.0.7444.134"
 SKIP_BUILD=false
 SKIP_TAG=false
 SKIP_GITHUB=false
+GITHUB_REPO="base-al/baseone"
 
 usage() {
     cat << EOF
@@ -245,15 +246,16 @@ Chromium: ${CHROMIUM_VERSION}
 - Apple Silicon (M1/M2/M3) or Intel processor
 "
 
-    # Create release
-    log "Publishing release v${VERSION} to GitHub..."
+    # Create release in base-al/baseone repository
+    log "Publishing release v${VERSION} to ${GITHUB_REPO}..."
     gh release create "v${VERSION}" \
+        --repo "$GITHUB_REPO" \
         --title "$RELEASE_TITLE" \
         --notes "$RELEASE_NOTES" \
         "$DMG_PATH"
 
     log "GitHub release created successfully"
-    log "View at: https://github.com/base-al/baseone/releases/tag/v${VERSION}"
+    log "View at: https://github.com/${GITHUB_REPO}/releases/tag/v${VERSION}"
 }
 
 main() {
@@ -330,7 +332,7 @@ main() {
     echo "=================================================="
     echo ""
     log "Next steps:"
-    log "  1. Check release: https://github.com/base-al/baseone/releases/tag/v${VERSION}"
+    log "  1. Check release: https://github.com/${GITHUB_REPO}/releases/tag/v${VERSION}"
     log "  2. Version API (one.base.al) will auto-update in ~5 minutes"
     log "  3. Test download and installation"
     echo ""
