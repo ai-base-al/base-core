@@ -95,6 +95,81 @@ done
 echo "   Total: $COUNT files updated"
 echo ""
 
+# Apply icon branding
+echo "3. Replacing app icons with BaseOne icons..."
+ICON_SRC="$BASE_DIR/features/branding/icons"
+ICON_DST="$SRC_DIR/chrome/app/theme/chromium/mac/Assets.xcassets/AppIcon.appiconset"
+
+if [ ! -d "$ICON_SRC" ]; then
+    echo "   WARNING: Icon source directory not found: $ICON_SRC"
+else
+    # Generate 64px icon if it doesn't exist
+    if [ ! -f "$ICON_SRC/base_icon_64.png" ]; then
+        echo "   Generating 64px icon..."
+        sips -z 64 64 "$ICON_SRC/base_icon_128.png" --out "$ICON_SRC/base_icon_64.png" >/dev/null 2>&1
+    fi
+
+    # Backup original icons
+    if [ -d "$ICON_DST" ] && [ ! -f "$ICON_DST/.backup_done" ]; then
+        echo "   Backing up original icons..."
+        cp -r "$ICON_DST" "$ICON_DST.bak"
+        touch "$ICON_DST/.backup_done"
+    fi
+
+    # Copy BaseOne icons
+    if [ -d "$ICON_DST" ]; then
+        echo "   Copying BaseOne icons..."
+        cp "$ICON_SRC/base_icon_16.png" "$ICON_DST/appicon_16.png"
+        cp "$ICON_SRC/base_icon_32.png" "$ICON_DST/appicon_32.png"
+        cp "$ICON_SRC/base_icon_64.png" "$ICON_DST/appicon_64.png"
+        cp "$ICON_SRC/base_icon_128.png" "$ICON_DST/appicon_128.png"
+        cp "$ICON_SRC/base_icon_256.png" "$ICON_DST/appicon_256.png"
+        cp "$ICON_SRC/base_icon_512.png" "$ICON_DST/appicon_512.png"
+        cp "$ICON_SRC/base_icon_1024.png" "$ICON_DST/appicon_1024.png"
+        echo "   7 icon files copied"
+    else
+        echo "   WARNING: Icon destination not found: $ICON_DST"
+    fi
+
+    # Copy app.icns for system-level icons (Dock, Finder, etc.)
+    ICNS_DST="$SRC_DIR/chrome/app/theme/chromium/mac/app.icns"
+    if [ -f "$ICON_SRC/app.icns" ]; then
+        echo "   Copying BaseOne app.icns..."
+        cp "$ICON_SRC/app.icns" "$ICNS_DST"
+        echo "   app.icns copied"
+    else
+        echo "   WARNING: app.icns not found: $ICON_SRC/app.icns"
+    fi
+fi
+echo ""
+
+# Copy product_logo_32.png (needed for chrome://theme/current-channel-logo)
+echo "4. Copying product_logo_32.png for theme system..."
+if [ -f "$ICON_SRC/base_icon_32.png" ]; then
+    cp "$ICON_SRC/base_icon_32.png" "$SRC_DIR/chrome/app/theme/chromium/product_logo_32.png"
+    echo "   product_logo_32.png copied (needed for chrome://theme/current-channel-logo)"
+else
+    echo "   WARNING: base_icon_32.png not found"
+fi
+echo ""
+
+# Copy Linux product logos
+echo "5. Copying Linux product logos..."
+if [ -d "$SRC_DIR/chrome/app/theme/chromium/linux" ]; then
+    cp "$ICON_SRC/base_icon_32.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_24.png"
+    cp "$ICON_SRC/base_icon_64.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_48.png"
+    cp "$ICON_SRC/base_icon_64.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_64.png"
+    cp "$ICON_SRC/base_icon_128.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_128.png"
+    cp "$ICON_SRC/base_icon_256.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_256.png"
+    echo "   5 Linux product logos copied"
+fi
+if [ -d "$SRC_DIR/chrome/app/theme/default_100_percent/chromium/linux" ]; then
+    cp "$ICON_SRC/base_icon_16.png" "$SRC_DIR/chrome/app/theme/default_100_percent/chromium/linux/product_logo_16.png"
+    cp "$ICON_SRC/base_icon_32.png" "$SRC_DIR/chrome/app/theme/default_100_percent/chromium/linux/product_logo_32.png"
+    echo "   2 Linux 100% scale product logos copied"
+fi
+echo ""
+
 # Show summary
 echo "========================================="
 echo "Branding Applied Successfully"
@@ -103,6 +178,8 @@ echo ""
 echo "Summary:"
 echo "- Product name: $TOTAL instances of 'Chromium' → 'BaseOne'"
 echo "- Copyright: $COUNT files updated with BaseCode LLC"
+echo "- macOS icons: 7 PNG sizes + app.icns replaced with BaseOne branding"
+echo "- Theme logos: product_logo_32.png + 7 Linux product logos replaced"
 echo ""
 echo "Files modified:"
 git diff --name-only chrome/app/ 2>/dev/null || find chrome/app -name "*.grd" -newer chrome/app/*.grd.bak 2>/dev/null | head -10
