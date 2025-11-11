@@ -69,3 +69,4 @@ backups/
 branding/generated_icons/
 features/branding/icons/*.png
 features/branding/icons/*.icns
+/binaries/

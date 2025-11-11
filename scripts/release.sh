@@ -8,8 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_DIR/ungoogled-chromium/build/src"
 OUT_DIR="$BUILD_DIR/out/Default"
-BINARIES_DIR="$PROJECT_DIR/binaries"
-RELEASES_DIR="$PROJECT_DIR/releases"
+BINARIES_DIR="/Volumes/External/BaseChrome/baseone-binaries"
+RELEASES_DIR="/Volumes/External/BaseChrome/baseone-binaries/releases"
 
 # Colors for output
 RED='\033[0;31m'
