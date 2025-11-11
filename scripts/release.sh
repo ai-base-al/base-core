@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_DIR/ungoogled-chromium/build/src"
 OUT_DIR="$BUILD_DIR/out/Default"
+BINARIES_DIR="$PROJECT_DIR/binaries"
 RELEASES_DIR="$PROJECT_DIR/releases"
 
 # Colors for output
@@ -34,7 +35,7 @@ OPTIONS:
     -v, --version VERSION       Version number (e.g., 0.1.0) [REQUIRED]
     -c, --codename NAME         Release codename (e.g., "Inception")
     -m, --chromium VERSION      Chromium base version (default: $CHROMIUM_VERSION)
-    -s, --skip-build            Skip building (use existing build)
+    -s, --skip-build            Skip building (use existing binary from binaries/)
     -n, --no-tag                Don't create git tag
     -g, --no-github             Don't create GitHub release
     -h, --help                  Show this help message
@@ -45,7 +46,7 @@ EXAMPLES:
 
 REQUIREMENTS:
     - gh (GitHub CLI) must be installed and authenticated
-    - Built browser at: $OUT_DIR/Base Dev.app
+    - BaseOne.app at: $BINARIES_DIR/BaseOne.app
     - Or run without --skip-build to build first
 
 EOF
@@ -88,6 +89,13 @@ check_requirements() {
         error "Version must be in semver format (e.g., 0.1.0)"
     fi
 
+    # Check for app in binaries directory
+    if [ "$SKIP_BUILD" = true ]; then
+        if [ ! -d "$BINARIES_DIR/BaseOne.app" ]; then
+            error "BaseOne.app not found at: $BINARIES_DIR/BaseOne.app"
+        fi
+    fi
+
     log "Requirements check passed"
 }
 
@@ -95,8 +103,8 @@ build_browser() {
     if [ "$SKIP_BUILD" = true ]; then
         log "Skipping build (--skip-build flag)"
 
-        if [ ! -d "$OUT_DIR/Base Dev.app" ]; then
-            error "Build not found at: $OUT_DIR/Base Dev.app"
+        if [ ! -d "$BINARIES_DIR/BaseOne.app" ]; then
+            error "BaseOne.app not found at: $BINARIES_DIR/BaseOne.app"
         fi
 
         return
@@ -108,6 +116,11 @@ build_browser() {
     if ! ninja -C out/Default chrome; then
         error "Build failed"
     fi
+
+    # Copy built app to binaries directory
+    log "Copying built app to binaries directory..."
+    mkdir -p "$BINARIES_DIR"
+    cp -R "$OUT_DIR/BaseOne.app" "$BINARIES_DIR/"
 
     log "Build completed successfully"
 }
@@ -126,7 +139,7 @@ create_dmg() {
 
     # Create temporary directory for DMG contents
     local TEMP_DIR=$(mktemp -d)
-    cp -R "$OUT_DIR/Base Dev.app" "$TEMP_DIR/"
+    cp -R "$BINARIES_DIR/BaseOne.app" "$TEMP_DIR/"
 
     # Create DMG
     log "Creating DMG: $DMG_NAME"
