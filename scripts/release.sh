@@ -195,10 +195,9 @@ push_git_tag() {
         return
     fi
 
-    log "Pushing git tag to origin..."
-    cd "$PROJECT_DIR"
-    git push origin "v${VERSION}"
-    log "Git tag pushed"
+    log "Skipping git tag push to base-core (release will create tag in ${GITHUB_REPO})..."
+    # Note: gh release create will automatically create the tag in base-al/baseone
+    # We keep local tags in base-core for tracking, but don't push them
 }
 
 create_github_release() {
