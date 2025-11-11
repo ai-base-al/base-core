@@ -24,7 +24,10 @@ CHROMIUM_VERSION="142.0.7444.134"
 SKIP_BUILD=false
 SKIP_TAG=false
 SKIP_GITHUB=false
+SKIP_SIGNING=false
+SKIP_NOTARIZE=false
 GITHUB_REPO="base-al/baseone"
+SIGNING_IDENTITY="Developer ID Application: Basecode shpk (9FHBCA6NT3)"
 
 usage() {
     cat << EOF
@@ -39,16 +42,20 @@ OPTIONS:
     -s, --skip-build            Skip building (use existing binary from binaries/)
     -n, --no-tag                Don't create git tag
     -g, --no-github             Don't create GitHub release
+    --no-signing                Skip code signing (for testing only)
+    --no-notarize               Skip notarization (sign only, faster for testing)
     -h, --help                  Show this help message
 
 EXAMPLES:
     $0 -v 0.1.0 -c "Inception"
     $0 --version 0.1.0 --codename "Inception" --skip-build
+    $0 --version 0.1.0 --skip-build --no-notarize
 
 REQUIREMENTS:
     - gh (GitHub CLI) must be installed and authenticated
     - BaseOne.app at: $BINARIES_DIR/BaseOne.app
     - Or run without --skip-build to build first
+    - Code signing certificate: $SIGNING_IDENTITY
 
 EOF
     exit 1
@@ -126,6 +133,93 @@ build_browser() {
     log "Build completed successfully"
 }
 
+sign_application() {
+    if [ "$SKIP_SIGNING" = true ]; then
+        log "Skipping code signing (--no-signing flag)"
+        return
+    fi
+
+    log "Signing BaseOne.app with $SIGNING_IDENTITY..."
+
+    local APP_PATH="$BINARIES_DIR/BaseOne.app"
+
+    if [ ! -d "$APP_PATH" ]; then
+        error "BaseOne.app not found at: $APP_PATH"
+    fi
+
+    # Sign all frameworks and helpers first (deep signing)
+    log "Signing frameworks and helpers..."
+    find "$APP_PATH" -type f \( -name "*.dylib" -o -name "*.framework" -o -name "*Helper*" \) -print0 | while IFS= read -r -d '' file; do
+        codesign --force --sign "$SIGNING_IDENTITY" \
+            --options runtime \
+            --timestamp \
+            "$file" 2>/dev/null || true
+    done
+
+    # Sign the main app bundle
+    log "Signing main application bundle..."
+    if ! codesign --force --deep --sign "$SIGNING_IDENTITY" \
+        --options runtime \
+        --timestamp \
+        --entitlements "$PROJECT_DIR/ungoogled-chromium/entitlements/app.entitlements" \
+        "$APP_PATH"; then
+        error "Code signing failed"
+    fi
+
+    # Verify signature
+    log "Verifying signature..."
+    if ! codesign --verify --deep --strict --verbose=2 "$APP_PATH"; then
+        error "Signature verification failed"
+    fi
+
+    log "Application signed successfully"
+}
+
+notarize_application() {
+    if [ "$SKIP_SIGNING" = true ] || [ "$SKIP_NOTARIZE" = true ]; then
+        if [ "$SKIP_NOTARIZE" = true ]; then
+            log "Skipping notarization (--no-notarize flag)"
+        fi
+        return
+    fi
+
+    log "Notarizing application with Apple..."
+
+    local APP_PATH="$BINARIES_DIR/BaseOne.app"
+    local ZIP_PATH="$BINARIES_DIR/BaseOne.zip"
+
+    # Create zip for notarization
+    log "Creating archive for notarization..."
+    rm -f "$ZIP_PATH"
+    /usr/bin/ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+
+    # Submit for notarization
+    log "Submitting to Apple notarization service..."
+    if ! xcrun notarytool submit "$ZIP_PATH" \
+        --keychain-profile "AC_PASSWORD" \
+        --wait; then
+        warn "Notarization failed or timed out"
+        warn "You can continue without notarization for testing"
+        read -p "Continue without notarization? (y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            error "Release cancelled"
+        fi
+        rm -f "$ZIP_PATH"
+        return
+    fi
+
+    # Staple the notarization ticket
+    log "Stapling notarization ticket..."
+    if ! xcrun stapler staple "$APP_PATH"; then
+        warn "Failed to staple notarization ticket"
+    fi
+
+    # Cleanup
+    rm -f "$ZIP_PATH"
+    log "Notarization completed successfully"
+}
+
 create_dmg() {
     log "Creating DMG package..."
 
@@ -169,14 +263,9 @@ create_git_tag() {
 
     cd "$PROJECT_DIR"
 
-    # Check if tag already exists
+    # Check if tag already exists and delete it automatically
     if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
-        warn "Tag v${VERSION} already exists"
-        read -p "Overwrite existing tag? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            error "Tag creation cancelled"
-        fi
+        log "Tag v${VERSION} already exists, deleting it..."
         git tag -d "v${VERSION}"
     fi
 
@@ -245,6 +334,12 @@ Chromium: ${CHROMIUM_VERSION}
 - Apple Silicon (M1/M2/M3) or Intel processor
 "
 
+    # Check if release already exists and delete it automatically
+    if gh release view "v${VERSION}" --repo "$GITHUB_REPO" >/dev/null 2>&1; then
+        log "Release v${VERSION} already exists on GitHub, deleting it..."
+        gh release delete "v${VERSION}" --repo "$GITHUB_REPO" --yes
+    fi
+
     # Create release in base-al/baseone repository
     log "Publishing release v${VERSION} to ${GITHUB_REPO}..."
     gh release create "v${VERSION}" \
@@ -285,6 +380,14 @@ main() {
                 SKIP_GITHUB=true
                 shift
                 ;;
+            --no-signing)
+                SKIP_SIGNING=true
+                shift
+                ;;
+            --no-notarize)
+                SKIP_NOTARIZE=true
+                shift
+                ;;
             -h|--help)
                 usage
                 ;;
@@ -306,20 +409,16 @@ main() {
     log "  Codename: ${CODENAME:-None}"
     log "  Chromium: $CHROMIUM_VERSION"
     log "  Skip build: $SKIP_BUILD"
+    log "  Skip signing: $SKIP_SIGNING"
+    log "  Skip notarize: $SKIP_NOTARIZE"
     log "  Skip tag: $SKIP_TAG"
     log "  Skip GitHub: $SKIP_GITHUB"
     echo ""
 
-    # Confirm
-    read -p "Proceed with release? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        log "Release cancelled"
-        exit 0
-    fi
-
     # Execute release steps
     build_browser
+    sign_application
+    notarize_application
     DMG_PATH=$(create_dmg)
     create_git_tag
     push_git_tag
