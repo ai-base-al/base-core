@@ -114,6 +114,89 @@ if [ ! -f "$UNGOOGLED_DIR/ungoogled-chromium/utils/downloads.py" ]; then
 fi
 
 # ============================================================================
+# CHECK PATCHES AND CONFIRM BUILD
+# ============================================================================
+
+echo ""
+echo "=========================================="
+echo "    Patch Status & Build Confirmation"
+echo "=========================================="
+echo ""
+
+# Check if source directory already exists and has patches applied
+PATCHES_APPLIED=false
+if [ -d "$SRC_DIR" ]; then
+  echo "Source directory exists: $SRC_DIR"
+  echo ""
+
+  # Check if BaseOne patches might be applied by looking for marker files or changes
+  if [ -f "$SRC_DIR/.baseone_patches_applied" ]; then
+    PATCHES_APPLIED=true
+    echo "BaseOne patches appear to be ALREADY APPLIED"
+    echo ""
+  else
+    echo "Source directory exists but patches may not be applied"
+    echo ""
+  fi
+fi
+
+# Show which patches will be applied
+echo "BaseOne patches to be applied (from patches/series):"
+echo ""
+if [ -f "$BASE_CORE_DIR/patches/series" ]; then
+  # Read and display patches from series file
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Skip empty lines and comments
+    if [ -n "$line" ] && [[ ! "$line" =~ ^[[:space:]]*# ]]; then
+      echo "  - $line"
+    fi
+  done < "$BASE_CORE_DIR/patches/series"
+else
+  echo "  (No patches/series file found)"
+fi
+echo ""
+
+if [ "$PATCHES_APPLIED" = true ]; then
+  echo "WARNING: Patches already applied. Re-applying may cause conflicts."
+  echo ""
+fi
+
+# Check if source directory already exists - do this BEFORE confirmations
+# so we don't waste time on confirmations if source exists and user doesn't want to rebuild
+if [ -d "$SRC_DIR" ]; then
+  echo "Warning: Source directory already exists at $SRC_DIR"
+  echo ""
+  read -p "Do you want to remove it and start fresh? (y/N) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "Removing existing source directory..."
+    rm -rf "$SRC_DIR"
+    echo ""
+  else
+    echo "Keeping existing source directory"
+    echo "If you want to rebuild, use ./scripts/build.sh instead"
+    exit 0
+  fi
+fi
+
+echo "This script will:"
+echo "  1. Download Chromium source (~10GB) if not present"
+echo "  2. Apply ungoogled-chromium patches"
+echo "  3. Apply BaseOne custom patches (listed above)"
+echo "  4. Build full Chromium (2-4 hours)"
+echo ""
+read -p "Continue with full build? (y/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  echo "Build cancelled."
+  echo ""
+  echo "To build manually:"
+  echo "  - Apply patches: ./scripts/patch.sh"
+  echo "  - Build incrementally: ./scripts/build.sh"
+  exit 0
+fi
+
+# ============================================================================
 # SAFETY CONFIRMATIONS - PREVENT ACCIDENTAL EXECUTION
 # ============================================================================
 
@@ -164,21 +247,6 @@ fi
 echo ""
 echo "Proceeding with full build setup..."
 echo ""
-
-# Check if source directory already exists
-if [ -d "$SRC_DIR" ]; then
-  echo "Warning: Source directory already exists at $SRC_DIR"
-  read -p "Do you want to remove it and start fresh? (y/N) " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Removing existing source directory..."
-    rm -rf "$SRC_DIR"
-  else
-    echo "Keeping existing source directory"
-    echo "If you want to rebuild, use ./scripts/build.sh instead"
-    exit 0
-  fi
-fi
 
 echo "Step 1: Checking Chromium source"
 if [ -d "$UNGOOGLED_DIR/build/src/.git" ]; then
