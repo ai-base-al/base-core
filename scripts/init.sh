@@ -212,6 +212,10 @@ _src_dir="$_root_dir/build/src"
 _main_repo="$_root_dir/ungoogled-chromium"
 _arch="arm64"
 
+# Create necessary directories
+mkdir -p "$_download_cache"
+mkdir -p "$_src_dir"
+
 # Retrieve and unpack resources (skip clone with -d flag)
 echo "Retrieving dependencies..."
 "$_root_dir/retrieve_and_unpack_resource.sh" -d -g $_arch 2>&1 | tee -a "$LOG_FILE"
