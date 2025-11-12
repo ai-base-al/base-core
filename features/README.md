@@ -19,8 +19,8 @@ features/
 
 ## Available Features
 
-### 1. Branding - "Base Dev"
-- Custom name: "Base Dev"
+### 1. Branding - "BaseOne"
+- Custom name: "BaseOne"
 - Custom icons and branding
 - Product name changes
 - Location: `features/branding/`

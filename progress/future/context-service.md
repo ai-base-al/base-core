@@ -46,7 +46,7 @@ The Context Service is the "eyes and ears" of the AI Assistant. It continuously 
 
 **Process Architecture**:
 ```
-Base Dev.app (Main Browser)
+BaseOne.app (Main Browser)
 ├── Browser Process
 │   └── Context Service Client (IPC)
 │       └── Mojo Connection to Base Context.app
@@ -165,10 +165,10 @@ chrome/app/base_context_main.cc           # Main entry point for Base Context.ap
 chrome/app/base_context.entitlements      # macOS entitlements
 
 # Helper App Structure (built as Base Context.app)
-Base Dev.app/
+BaseOne.app/
 └── Contents/
     └── Frameworks/
-        └── Base Dev Framework.framework/
+        └── BaseOne Framework.framework/
             └── Helpers/
                 └── Base Context.app/           # The helper process
                     ├── Contents/

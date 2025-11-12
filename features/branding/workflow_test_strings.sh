@@ -66,7 +66,7 @@ test_strings() {
     echo -e "${YELLOW}${BOLD}🧪 Testing Changes...${NC}"
     echo ""
 
-    APP_PATH="$ROOT_DIR/ungoogled-chromium/build/src/out/Default/Base Dev.app"
+    APP_PATH="$ROOT_DIR/ungoogled-chromium/build/src/out/Default/BaseOne.app"
 
     if [ ! -d "$APP_PATH" ]; then
         echo -e "${YELLOW}⚠️  App not found. Build may have failed.${NC}"
@@ -81,12 +81,12 @@ test_strings() {
     # Check if app launches
     echo ""
     echo -e "${DIM}2. Testing launch:${NC}"
-    echo -e "   Opening Base Dev..."
+    echo -e "   Opening BaseOne..."
     open "$APP_PATH"
 
     sleep 3
 
-    if pgrep -f "Base Dev" > /dev/null; then
+    if pgrep -f "BaseOne" > /dev/null; then
         echo -e "   ${GREEN}✓${NC} App is running!"
     else
         echo -e "   ${YELLOW}⚠${NC}  App may need manual approval"
@@ -95,9 +95,9 @@ test_strings() {
     echo ""
     echo -e "${BOLD}Manual Testing Checklist:${NC}"
     echo ""
-    echo -e "  [ ] Window title shows 'Base Dev'"
-    echo -e "  [ ] About menu says 'About Base Dev'"
-    echo -e "  [ ] About dialog shows 'Base Dev'"
+    echo -e "  [ ] Window title shows 'BaseOne'"
+    echo -e "  [ ] About menu says 'About BaseOne'"
+    echo -e "  [ ] About dialog shows 'BaseOne'"
     echo -e "  [ ] Copyright shows 'BaseCode LLC'"
     echo -e "  [ ] Attribution includes 'Based on Chromium'"
     echo -e "  [ ] No 'Chromium' in visible UI"

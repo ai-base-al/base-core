@@ -1,4 +1,4 @@
-# Script Audit - Base Dev Browser
+# Script Audit - BaseOne Browser
 Generated: 2025-11-11
 
 ## Summary
@@ -7,7 +7,7 @@ Generated: 2025-11-11
 - Base-core: `/Volumes/External/BaseChrome/base-core/`
 - Ungoogled-chromium: `/Volumes/External/BaseChrome/ungoogled-chromium/`
 - Chromium source: `/Volumes/External/BaseChrome/ungoogled-chromium/build/src/`
-- Built app: `/Volumes/External/BaseChrome/ungoogled-chromium/build/src/out/Default/Base Dev.app`
+- Built app: `/Volumes/External/BaseChrome/ungoogled-chromium/build/src/out/Default/BaseOne.app`
 
 ## Main Build Scripts (scripts/)
 
@@ -82,7 +82,7 @@ Generated: 2025-11-11
 ### String Replacement Scripts
 
 **replace_strings.sh** ⚠️ NEEDS PATH UPDATE
-- Purpose: Replace "Chromium" with "Base Dev" in source strings
+- Purpose: Replace "Chromium" with "BaseOne" in source strings
 - Status: Has old paths
 - Current path calculation:
   ```bash
@@ -122,7 +122,7 @@ Generated: 2025-11-11
 ### Branding Application Scripts
 
 **apply.sh** (features/branding/) ⚠️ NEEDS PATH UPDATE
-- Purpose: Apply complete Base Dev branding
+- Purpose: Apply complete BaseOne branding
 - Status: Has old paths
 - Current path calculation:
   ```bash
@@ -147,7 +147,7 @@ Generated: 2025-11-11
   ```
 - Issues: Path calculation results in wrong location
 - What it does:
-  - Renames Chromium.app to "Base Dev.app"
+  - Renames Chromium.app to "BaseOne.app"
   - Updates CFBundleName, CFBundleIdentifier, CFBundleDisplayName
 - Action needed: Fix path or update to use absolute path
 
@@ -225,10 +225,10 @@ SRC_DIR="$UNGOOGLED_DIR/build/src"
 For instant branding (Info.plist only):
 ```bash
 cd /Volumes/External/BaseChrome/ungoogled-chromium/build/src/out/Default
-mv Chromium.app "Base Dev.app"
-/usr/libexec/PlistBuddy -c "Set :CFBundleName 'Base Dev'" "Base Dev.app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier al.base.BaseDev" "Base Dev.app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'Base Dev'" "Base Dev.app/Contents/Info.plist"
+mv Chromium.app "BaseOne.app"
+/usr/libexec/PlistBuddy -c "Set :CFBundleName 'BaseOne'" "BaseOne.app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier al.base.BaseOne" "BaseOne.app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'BaseOne'" "BaseOne.app/Contents/Info.plist"
 ```
 
 Status: ✅ WORKING (used successfully on 2025-11-11)

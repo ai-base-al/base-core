@@ -317,7 +317,7 @@ Codename: ${CODENAME:-Release}
 Chromium: ${CHROMIUM_VERSION}
 
 ## What's New
-- Complete Base Dev branding
+- Complete BaseOne branding
 - Privacy-focused features
 - Enhanced security
 

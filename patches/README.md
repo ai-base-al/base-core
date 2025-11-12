@@ -87,7 +87,7 @@ Add an entry to this README under the appropriate category.
 Follow these conventions for consistency:
 
 - baseone-{category}-{description}.patch - Core BaseOne modifications
-- basedev-{category}-{description}.patch - BaseDev specific features
+- basedev-{category}-{description}.patch - BaseOne specific features
 - fix-{component}-{issue}.patch - Bug fixes
 - disable-{feature}.patch - Feature removal
 

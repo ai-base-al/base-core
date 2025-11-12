@@ -1,4 +1,4 @@
-# Base Dev Branding Patch
+# BaseOne Branding Patch
 # This patch is auto-generated and documents the branding changes
 # Apply script handles the actual changes
 
@@ -12,5 +12,5 @@ diff --git a/chrome/app/theme/chromium/BRANDING b/chrome/app/theme/chromium/BRAN
 -PRODUCT_SHORTNAME=Chromium
 +COMPANY_FULLNAME=Base
 +COMPANY_SHORTNAME=Base
-+PRODUCT_FULLNAME=Base Dev Browser
++PRODUCT_FULLNAME=BaseOne Browser
 +PRODUCT_SHORTNAME=Base

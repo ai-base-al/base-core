@@ -6833,31 +6833,31 @@ index 0000000..0b1ba5b
 +#include "chrome/grit/generated_resources.h"
 +#include "ui/base/l10n/l10n_util.h"
 +
-+BaseDevAIAssistantModeSidePanelCoordinator::BaseDevAIAssistantModeSidePanelCoordinator(
++BaseOneAIAssistantModeSidePanelCoordinator::BaseOneAIAssistantModeSidePanelCoordinator(
 +    Browser* browser)
 +    : browser_(browser) {}
 +
-+BaseDevAIAssistantModeSidePanelCoordinator::~BaseDevAIAssistantModeSidePanelCoordinator() = default;
++BaseOneAIAssistantModeSidePanelCoordinator::~BaseOneAIAssistantModeSidePanelCoordinator() = default;
 +
-+BROWSER_USER_DATA_KEY_IMPL(BaseDevAIAssistantModeSidePanelCoordinator)
++BROWSER_USER_DATA_KEY_IMPL(BaseOneAIAssistantModeSidePanelCoordinator)
 +
-+void BaseDevAIAssistantModeSidePanelCoordinator::CreateAndRegisterEntry(
++void BaseOneAIAssistantModeSidePanelCoordinator::CreateAndRegisterEntry(
 +    SidePanelRegistry* global_registry) {
 +  global_registry->Register(std::make_unique<SidePanelEntry>(
-+      SidePanelEntry::Id::kBaseDevAIAssistantMode,
++      SidePanelEntry::Id::kBaseOneAIAssistantMode,
 +      l10n_util::GetStringUTF16(IDS_BASEDEV_AIASSISTANT_MODE_TITLE),
 +      ui::ImageModel::FromVectorIcon(kReadLaterIcon, ui::kColorIcon),
 +      base::BindRepeating(
-+          &BaseDevAIAssistantModeSidePanelCoordinator::CreateWebView,
++          &BaseOneAIAssistantModeSidePanelCoordinator::CreateWebView,
 +          base::Unretained(this))));
 +}
 +
 +std::unique_ptr<views::View>
-+BaseDevAIAssistantModeSidePanelCoordinator::CreateWebView() {
-+  auto web_view = std::make_unique<SidePanelWebUIViewT<BaseDevAIAssistantModeUI>>(
++BaseOneAIAssistantModeSidePanelCoordinator::CreateWebView() {
++  auto web_view = std::make_unique<SidePanelWebUIViewT<BaseOneAIAssistantModeUI>>(
 +      base::RepeatingClosure(), base::RepeatingClosure(),
-+      std::make_unique<BubbleContentsWrapperT<BaseDevAIAssistantModeUI>>(
-+          GURL(chrome::kChromeUIBaseDevAIAssistantModeSidePanelURL),
++      std::make_unique<BubbleContentsWrapperT<BaseOneAIAssistantModeUI>>(
++          GURL(chrome::kChromeUIBaseOneAIAssistantModeSidePanelURL),
 +          browser_->profile(),
 +          IDS_BASEDEV_AIASSISTANT_MODE_TITLE));
 +
@@ -6865,22 +6865,22 @@ index 0000000..0b1ba5b
 +  return web_view;
 +}
 +
-+void BaseDevAIAssistantModeSidePanelCoordinator::Toggle() {
++void BaseOneAIAssistantModeSidePanelCoordinator::Toggle() {
 +  auto* browser_view = BrowserView::GetBrowserViewForBrowser(browser_);
 +  if (!browser_view) return;
 +
 +  auto* coordinator = browser_view->side_panel_coordinator();
 +  if (!coordinator) return;
 +
-+  if (coordinator->GetCurrentEntryId() == SidePanelEntry::Id::kBaseDevAIAssistantMode) {
++  if (coordinator->GetCurrentEntryId() == SidePanelEntry::Id::kBaseOneAIAssistantMode) {
 +    coordinator->Close();
 +  } else {
-+    coordinator->Show(SidePanelEntry::Id::kBaseDevAIAssistantMode);
++    coordinator->Show(SidePanelEntry::Id::kBaseOneAIAssistantMode);
 +  }
 +}
 +
-+bool BaseDevAIAssistantModeSidePanelCoordinator::IsAvailable() const {
-+  // BaseDev: Add your availability logic here
++bool BaseOneAIAssistantModeSidePanelCoordinator::IsAvailable() const {
++  // BaseOne: Add your availability logic here
 +  return true;
 +}
 diff --git a/build/src/chrome/browser/ui/views/side_panel/basedev_aiassistant_side_panel_coordinator.h b/build/src/chrome/browser/ui/views/side_panel/basedev_aiassistant_side_panel_coordinator.h
@@ -6903,19 +6903,19 @@ index 0000000..96b2d97
 +class Browser;
 +class SidePanelRegistry;
 +
-+// BaseDev: Coordinator for AIAssistant Mode side panel
-+class BaseDevAIAssistantModeSidePanelCoordinator
-+    : public BrowserUserData<BaseDevAIAssistantModeSidePanelCoordinator> {
++// BaseOne: Coordinator for AIAssistant Mode side panel
++class BaseOneAIAssistantModeSidePanelCoordinator
++    : public BrowserUserData<BaseOneAIAssistantModeSidePanelCoordinator> {
 + public:
-+  explicit BaseDevAIAssistantModeSidePanelCoordinator(Browser* browser);
-+  ~BaseDevAIAssistantModeSidePanelCoordinator() override;
++  explicit BaseOneAIAssistantModeSidePanelCoordinator(Browser* browser);
++  ~BaseOneAIAssistantModeSidePanelCoordinator() override;
 +
 +  void CreateAndRegisterEntry(SidePanelRegistry* global_registry);
 +  void Toggle();
 +  bool IsAvailable() const;
 +
 + private:
-+  friend class BrowserUserData<BaseDevAIAssistantModeSidePanelCoordinator>;
++  friend class BrowserUserData<BaseOneAIAssistantModeSidePanelCoordinator>;
 +
 +  std::unique_ptr<views::View> CreateWebView();
 +
@@ -7669,13 +7669,13 @@ index 0000000..eb461e4
 +
 +module basedev_aiassistant.mojom;
 +
-+// BaseDev: Browser-side handler for AIAssistant Mode panel
++// BaseOne: Browser-side handler for AIAssistant Mode panel
 +interface PageHandler {
 +  // Perform the main action
 +  DoAction();
 +};
 +
-+// BaseDev: Renderer-side handler for responses from browser
++// BaseOne: Renderer-side handler for responses from browser
 +interface Page {
 +  // Called when action is complete
 +  OnActionComplete(string result);
@@ -7701,11 +7701,11 @@ index 0000000..9b7dede
 +#include "content/public/browser/web_contents.h"
 +#include "content/public/browser/web_ui_data_source.h"
 +
-+BaseDevAIAssistantModeUI::BaseDevAIAssistantModeUI(content::WebUI* web_ui)
++BaseOneAIAssistantModeUI::BaseOneAIAssistantModeUI(content::WebUI* web_ui)
 +    : ui::MojoBubbleWebUIController(web_ui) {
 +  content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
 +      web_ui->GetWebContents()->GetBrowserContext(),
-+      chrome::kChromeUIBaseDevAIAssistantModeSidePanelHost);
++      chrome::kChromeUIBaseOneAIAssistantModeSidePanelHost);
 +
 +  // Add localized strings
 +  source->AddLocalizedString("title", IDS_BASEDEV_AIASSISTANT_MODE_TITLE);
@@ -7714,7 +7714,7 @@ index 0000000..9b7dede
 +  // Set up resources
 +  webui::SetupWebUIDataSource(
 +      source,
-+      base::make_span(kBaseDevAIAssistantModeResources, kBaseDevAIAssistantModeResourcesSize),
++      base::make_span(kBaseOneAIAssistantModeResources, kBaseOneAIAssistantModeResourcesSize),
 +      IDR_BASEDEV_AIASSISTANT_MODE_HTML);
 +
 +  source->OverrideContentSecurityPolicy(
@@ -7722,18 +7722,18 @@ index 0000000..9b7dede
 +      "trusted-types static-types;");
 +}
 +
-+BaseDevAIAssistantModeUI::~BaseDevAIAssistantModeUI() = default;
++BaseOneAIAssistantModeUI::~BaseOneAIAssistantModeUI() = default;
 +
-+WEB_UI_CONTROLLER_TYPE_IMPL(BaseDevAIAssistantModeUI)
++WEB_UI_CONTROLLER_TYPE_IMPL(BaseOneAIAssistantModeUI)
 +
-+void BaseDevAIAssistantModeUI::BindInterface(
++void BaseOneAIAssistantModeUI::BindInterface(
 +    mojo::PendingReceiver<basedev_aiassistant::mojom::PageHandler> receiver) {
 +  receiver_.reset();
 +  receiver_.Bind(std::move(receiver));
 +}
 +
-+void BaseDevAIAssistantModeUI::DoAction() {
-+  // BaseDev: Implement your panel action here
++void BaseOneAIAssistantModeUI::DoAction() {
++  // BaseOne: Implement your panel action here
 +  if (page_) {
 +    page_->OnActionComplete("Action completed");
 +  }
@@ -7758,15 +7758,15 @@ index 0000000..522d02c
 +#include "mojo/public/cpp/bindings/receiver.h"
 +#include "ui/webui/mojo_bubble_web_ui_controller.h"
 +
-+// BaseDev: Framework-aware AI assistant with MCP support
-+class BaseDevAIAssistantModeUI : public ui::MojoBubbleWebUIController,
++// BaseOne: Framework-aware AI assistant with MCP support
++class BaseOneAIAssistantModeUI : public ui::MojoBubbleWebUIController,
 +                          public basedev_aiassistant::mojom::PageHandler {
 + public:
-+  explicit BaseDevAIAssistantModeUI(content::WebUI* web_ui);
-+  ~BaseDevAIAssistantModeUI() override;
++  explicit BaseOneAIAssistantModeUI(content::WebUI* web_ui);
++  ~BaseOneAIAssistantModeUI() override;
 +
-+  BaseDevAIAssistantModeUI(const BaseDevAIAssistantModeUI&) = delete;
-+  BaseDevAIAssistantModeUI& operator=(const BaseDevAIAssistantModeUI&) = delete;
++  BaseOneAIAssistantModeUI(const BaseOneAIAssistantModeUI&) = delete;
++  BaseOneAIAssistantModeUI& operator=(const BaseOneAIAssistantModeUI&) = delete;
 +
 +  void BindInterface(
 +      mojo::PendingReceiver<basedev_aiassistant::mojom::PageHandler> receiver);
@@ -7778,7 +7778,7 @@ index 0000000..522d02c
 +  mojo::Receiver<basedev_aiassistant::mojom::PageHandler> receiver_{this};
 +  mojo::Remote<basedev_aiassistant::mojom::Page> page_;
 +
-+  base::WeakPtrFactory<BaseDevAIAssistantModeUI> weak_factory_{this};
++  base::WeakPtrFactory<BaseOneAIAssistantModeUI> weak_factory_{this};
 +
 +  WEB_UI_CONTROLLER_TYPE_DECL();
 +};
@@ -7986,8 +7986,8 @@ index 0000000..54f8621
 +inline constexpr char kChromeUINewTabPageThirdPartyHost[] =
 +    "new-tab-page-third-party";
 +inline constexpr char kChromeUINewTabPageThirdPartyURL[] =
-+inline constexpr char kChromeUIBaseDevAIAssistantModeSidePanelHost[] = "basedev-aiassistant-side-panel";
-+inline constexpr char kChromeUIBaseDevAIAssistantModeSidePanelURL[] = "chrome://basedev-aiassistant-side-panel/";
++inline constexpr char kChromeUIBaseOneAIAssistantModeSidePanelHost[] = "basedev-aiassistant-side-panel";
++inline constexpr char kChromeUIBaseOneAIAssistantModeSidePanelURL[] = "chrome://basedev-aiassistant-side-panel/";
 +    "chrome://new-tab-page-third-party/";
 +inline constexpr char kChromeUINewTabPageURL[] = "chrome://new-tab-page/";
 +inline constexpr char kChromeUINewTabURL[] = "chrome://newtab/";

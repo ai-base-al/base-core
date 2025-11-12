@@ -1,6 +1,6 @@
-# Base Dev Branding Assets Inventory
+# BaseOne Branding Assets Inventory
 
-Complete inventory of all branding assets for Base Dev browser.
+Complete inventory of all branding assets for BaseOne browser.
 
 ## Quick Reference
 
@@ -119,13 +119,13 @@ Located in: `/Volumes/External/BaseChrome/base-core/branding/generated_icons/`
 ### String Categories
 
 **Product Names**:
-- "Chromium" → "Base Dev"
-- "Chromium Helper" → "Base Dev Helper"
-- "Google Chrome" → "Base Dev" (where applicable)
+- "Chromium" → "BaseOne"
+- "Chromium Helper" → "BaseOne Helper"
+- "Google Chrome" → "BaseOne" (where applicable)
 
 **Company/Copyright**:
-- "The Chromium Authors" → "BaseDev Team"
-- "Copyright © 2025 BaseDev Team"
+- "The Chromium Authors" → "BaseOne Team"
+- "Copyright © 2025 BaseOne Team"
 - "Based on Chromium, Copyright The Chromium Authors"
 
 **URLs** (Placeholder - awaiting final domains):
@@ -149,7 +149,7 @@ Located in: `/Volumes/External/BaseChrome/base-core/branding/generated_icons/`
 When the browser is built, assets are copied to:
 
 ```
-ungoogled-chromium/build/src/out/Default/Base Dev.app/Contents/
+ungoogled-chromium/build/src/out/Default/BaseOne.app/Contents/
 ├── Resources/
 │   ├── app.icns                         # Main app icon
 │   └── product_logo_*.png               # Product logos
@@ -160,11 +160,11 @@ ungoogled-chromium/build/src/out/Default/Base Dev.app/Contents/
 
 ```xml
 <key>CFBundleName</key>
-<string>Base Dev</string>
+<string>BaseOne</string>
 <key>CFBundleDisplayName</key>
-<string>Base Dev</string>
+<string>BaseOne</string>
 <key>CFBundleIdentifier</key>
-<string>al.base.BaseDev</string>
+<string>al.base.BaseOne</string>
 <key>CFBundleIconFile</key>
 <string>app.icns</string>
 ```
@@ -246,23 +246,23 @@ cd /Volumes/External/BaseChrome/base-core
 ### High Priority (Always Visible)
 
 - **Dock/Finder**: `app.icns` → All users see this constantly
-- **Window Title**: String replacement → "Base Dev" in title bar
+- **Window Title**: String replacement → "BaseOne" in title bar
 - **About Page**: `product_logo_name_22.png` + string replacements
-- **Settings**: Product logo + "Base Dev" strings
+- **Settings**: Product logo + "BaseOne" strings
 
 ### Medium Priority (Frequently Visible)
 
 - **Tab Favicon**: `base_icon_16.png` or `base_icon_32.png`
 - **Bookmark Icons**: `base_icon_16.png`
 - **Menu Items**: `product_logo_name_22.png`
-- **Error Pages**: Product logo + "Base Dev" strings
+- **Error Pages**: Product logo + "BaseOne" strings
 
 ### Low Priority (Rarely Visible)
 
-- **Crash Reporter**: "Base Dev" strings
-- **Print Dialog**: "Base Dev" in headers
-- **Developer Tools**: "Base Dev" in titles
-- **Internal Pages**: chrome:// pages with "Base Dev"
+- **Crash Reporter**: "BaseOne" strings
+- **Print Dialog**: "BaseOne" in headers
+- **Developer Tools**: "BaseOne" in titles
+- **Internal Pages**: chrome:// pages with "BaseOne"
 
 ---
 

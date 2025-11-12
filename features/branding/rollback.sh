@@ -1,5 +1,5 @@
 #!/bin/bash
-# Rollback Base Dev branding to original Chromium
+# Rollback BaseOne branding to original Chromium
 
 set -e
 

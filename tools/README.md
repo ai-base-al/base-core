@@ -1,4 +1,4 @@
-# BaseDev Tools
+# BaseOne Tools
 
 Automated tools for Base Browser development.
 
@@ -74,9 +74,9 @@ For a panel named "Reading", the script generates:
 | Item | Generated Name |
 |------|----------------|
 | Directory | `basedev_reading/` |
-| Class | `BaseDevReadingModeUI` |
-| Coordinator | `BaseDevReadingModeSidePanelCoordinator` |
-| Enum ID | `kBaseDevReadingMode` |
+| Class | `BaseOneReadingModeUI` |
+| Coordinator | `BaseOneReadingModeSidePanelCoordinator` |
+| Enum ID | `kBaseOneReadingMode` |
 | URL Host | `basedev-reading-side-panel` |
 | URL | `chrome://basedev-reading-side-panel/` |
 | Mojom Module | `basedev_reading.mojom` |

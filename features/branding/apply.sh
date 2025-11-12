@@ -1,5 +1,5 @@
 #!/bin/bash
-# Apply Base Dev branding to Chromium
+# Apply BaseOne branding to Chromium
 
 set -e
 
@@ -19,7 +19,7 @@ source "$SCRIPT_DIR/config.sh"
 
 echo ""
 echo -e "${CYAN}${BOLD}════════════════════════════════════════${NC}"
-echo -e "${CYAN}${BOLD}   🎨 Applying Base Dev Branding${NC}"
+echo -e "${CYAN}${BOLD}   🎨 Applying BaseOne Branding${NC}"
 echo -e "${CYAN}${BOLD}════════════════════════════════════════${NC}"
 echo ""
 
@@ -123,7 +123,7 @@ else
     echo -e "  ${YELLOW}⚠️  Icon generation script not found or not executable${NC}"
 fi
 
-# 6b. Replace icons with Base Dev branding
+# 6b. Replace icons with BaseOne branding
 echo -e "${GREEN}✓${NC} Replacing app icons..."
 ICONS_SRC="$SCRIPT_DIR/icons"
 ICON_COUNT=0
@@ -179,7 +179,7 @@ fi
 # 7. Create patch file for reference
 echo -e "${GREEN}✓${NC} Creating patch file..."
 cat > "$SCRIPT_DIR/patches/base-dev-branding.patch" << 'EOFPATCH'
-# Base Dev Branding Patch
+# BaseOne Branding Patch
 # This patch is auto-generated and documents the branding changes
 # Apply script handles the actual changes
 
@@ -193,7 +193,7 @@ diff --git a/chrome/app/theme/chromium/BRANDING b/chrome/app/theme/chromium/BRAN
 -PRODUCT_SHORTNAME=Chromium
 +COMPANY_FULLNAME=Base
 +COMPANY_SHORTNAME=Base
-+PRODUCT_FULLNAME=Base Dev Browser
++PRODUCT_FULLNAME=BaseOne Browser
 +PRODUCT_SHORTNAME=Base
 EOFPATCH
 
@@ -203,7 +203,7 @@ echo ""
 echo -e "${BOLD}Next Steps:${NC}"
 echo -e "  1. Build with: ${CYAN}./run/5_build_macos.sh -d${NC}"
 echo -e "  2. Build time: ${DIM}~15-30 minutes (incremental)${NC}"
-echo -e "  3. Result: ${CYAN}Base Dev.app${NC} in build/src/out/Default/"
+echo -e "  3. Result: ${CYAN}BaseOne.app${NC} in build/src/out/Default/"
 echo ""
 echo -e "${BOLD}To Rollback:${NC}"
 echo -e "  ${CYAN}./features/branding/rollback.sh${NC}"

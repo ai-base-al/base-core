@@ -2,13 +2,13 @@
 # Branding configuration
 
 # Product names
-export PRODUCT_NAME="Base Dev"
+export PRODUCT_NAME="BaseOne"
 export PRODUCT_SHORT_NAME="Base"
-export PRODUCT_FULLNAME="Base Dev Browser"
+export PRODUCT_FULLNAME="BaseOne Browser"
 export COMPANY_NAME="BaseCode LLC"
 
 # Bundle identifiers
-export BUNDLE_ID="al.base.BaseDev"
+export BUNDLE_ID="al.base.BaseOne"
 
 # Version info
 export COPYRIGHT="Copyright 2025 Base Browser"

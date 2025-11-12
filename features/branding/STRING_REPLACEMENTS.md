@@ -1,18 +1,18 @@
-# String Replacements - Base Dev Branding
+# String Replacements - BaseOne Branding
 
-Complete list of smart string replacements applied to make "Base Dev" appear throughout the UI.
+Complete list of smart string replacements applied to make "BaseOne" appear throughout the UI.
 
 ## What Gets Replaced
 
 ### ✅ User-Facing Strings (SAFE to replace)
 
 1. **Window Titles**
-   - `Chromium - Page Title` → `Base Dev - Page Title`
-   - `Page Title - Chromium` → `Page Title - Base Dev`
+   - `Chromium - Page Title` → `BaseOne - Page Title`
+   - `Page Title - Chromium` → `Page Title - BaseOne`
 
 2. **About Dialog**
-   - `About Chromium` → `About Base Dev`
-   - `About &Chromium` → `About Base Dev`
+   - `About Chromium` → `About BaseOne`
+   - `About &Chromium` → `About BaseOne`
 
 3. **Copyright Notice**
    - Original: `Copyright 2025 The Chromium Authors. All rights reserved.`
@@ -20,16 +20,16 @@ Complete list of smart string replacements applied to make "Base Dev" appear thr
    - **Preserves Chromium attribution** ✓
 
 4. **UI Messages**
-   - `sign in to Chromium` → `sign in to Base Dev`
-   - `signed in to Chromium` → `signed in to Base Dev`
-   - `make Chromium better` → `make Base Dev better`
+   - `sign in to Chromium` → `sign in to BaseOne`
+   - `signed in to Chromium` → `signed in to BaseOne`
+   - `make Chromium better` → `make BaseOne better`
 
 5. **Logos and Alt Text**
-   - `Chromium logo` → `Base Dev logo`
-   - `Chromium Enterprise logo` → `Base Dev Enterprise logo`
+   - `Chromium logo` → `BaseOne logo`
+   - `Chromium Enterprise logo` → `BaseOne Enterprise logo`
 
 6. **Settings**
-   - `About Chromium` (menu) → `About Base Dev`
+   - `About Chromium` (menu) → `About BaseOne`
    - Settings page titles
 
 ### ❌ What DOESN'T Get Replaced (SAFE to keep)
@@ -72,7 +72,7 @@ Complete list of smart string replacements applied to make "Base Dev" appear thr
 ### After:
 ```xml
 <message name="IDS_ABOUT" desc="About menu item">
-  About Base Dev
+  About BaseOne
 </message>
 
 <message name="IDS_ABOUT_VERSION_COPYRIGHT">
@@ -116,9 +116,9 @@ After string replacement: **10-20 minutes** (only UI strings recompile)
 ## Verification
 
 After building, verify:
-1. About dialog says "About Base Dev"
+1. About dialog says "About BaseOne"
 2. Copyright shows "BaseCode LLC. Based on Chromium..."
-3. Window titles show "Base Dev"
+3. Window titles show "BaseOne"
 4. No "Chromium" in user-visible UI (except attribution)
 
 ## Configuration

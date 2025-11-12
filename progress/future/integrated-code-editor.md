@@ -260,10 +260,10 @@ third_party/monaco-editor/               # Monaco Editor dependency
 **Tab Registration**:
 ```cpp
 // chrome/browser/ui/views/tabs/basedev_code_tab.h
-class BaseDevCodeTab : public Tab {
+class BaseOneCodeTab : public Tab {
  public:
-  BaseDevCodeTab();
-  ~BaseDevCodeTab() override;
+  BaseOneCodeTab();
+  ~BaseOneCodeTab() override;
 
   // Override Tab methods
   bool ShouldShowAddressBar() override { return false; }

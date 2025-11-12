@@ -32,10 +32,10 @@ base-core/
 
 **Naming Convention**:
 - Patch files: `basedev-sidepanel-{feature}.patch`
-- Side panel ID: `kBaseDevReadingMode`
+- Side panel ID: `kBaseOneReadingMode`
 - WebUI directories: `basedev_{feature}/`
 - URL host: `basedev-{feature}-side-panel`
-- Coordinator class: `BaseDevReadingModeSidePanelCoordinator`
+- Coordinator class: `BaseOneReadingModeSidePanelCoordinator`
 
 ## Prerequisites
 
@@ -59,7 +59,7 @@ Create patch file: `/Volumes/External/BaseChrome/base-core/patches/ungoogled-chr
      kAssistant,
      kBookmarks,
      kHistoryClusters,
-+    kBaseDevReadingMode,  // BaseDev: Custom reading mode panel
++    kBaseOneReadingMode,  // BaseOne: Custom reading mode panel
      kReadingList,
      kReadAnything,
      kSearchCompanion,
@@ -68,8 +68,8 @@ Create patch file: `/Volumes/External/BaseChrome/base-core/patches/ungoogled-chr
        return Key(Id::kHistoryClusters);
      }
 +
-+    static Key BaseDevReadingMode() {
-+      return Key(Id::kBaseDevReadingMode);
++    static Key BaseOneReadingMode() {
++      return Key(Id::kBaseOneReadingMode);
 +    }
 
      static Key ReadingList() {
@@ -95,14 +95,14 @@ Create: `chrome/browser/ui/webui/side_panel/basedev_reading/basedev_reading_ui.h
 #include "mojo/public/cpp/bindings/receiver.h"
 #include "ui/webui/mojo_bubble_web_ui_controller.h"
 
-class BaseDevReadingModeUI : public ui::MojoBubbleWebUIController,
+class BaseOneReadingModeUI : public ui::MojoBubbleWebUIController,
                       public basedev_reading::mojom::PageHandler {
  public:
-  explicit BaseDevReadingModeUI(content::WebUI* web_ui);
-  ~BaseDevReadingModeUI() override;
+  explicit BaseOneReadingModeUI(content::WebUI* web_ui);
+  ~BaseOneReadingModeUI() override;
 
-  BaseDevReadingModeUI(const BaseDevReadingModeUI&) = delete;
-  BaseDevReadingModeUI& operator=(const BaseDevReadingModeUI&) = delete;
+  BaseOneReadingModeUI(const BaseOneReadingModeUI&) = delete;
+  BaseOneReadingModeUI& operator=(const BaseOneReadingModeUI&) = delete;
 
   void BindInterface(
       mojo::PendingReceiver<basedev_reading::mojom::PageHandler> receiver);
@@ -121,7 +121,7 @@ class BaseDevReadingModeUI : public ui::MojoBubbleWebUIController,
   mojo::Receiver<basedev_reading::mojom::PageHandler> receiver_{this};
   mojo::Remote<basedev_reading::mojom::Page> page_;
 
-  base::WeakPtrFactory<BaseDevReadingModeUI> weak_factory_{this};
+  base::WeakPtrFactory<BaseOneReadingModeUI> weak_factory_{this};
 
   WEB_UI_CONTROLLER_TYPE_DECL();
 };
@@ -145,7 +145,7 @@ Create: `chrome/browser/ui/webui/side_panel/basedev_reading/basedev_reading_ui.c
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_ui_data_source.h"
 
-BaseDevReadingModeUI::BaseDevReadingModeUI(content::WebUI* web_ui)
+BaseOneReadingModeUI::BaseOneReadingModeUI(content::WebUI* web_ui)
     : ui::MojoBubbleWebUIController(web_ui) {
   content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
       web_ui->GetWebContents()->GetBrowserContext(),
@@ -159,7 +159,7 @@ BaseDevReadingModeUI::BaseDevReadingModeUI(content::WebUI* web_ui)
   // Set up resources
   webui::SetupWebUIDataSource(
       source,
-      base::make_span(kBaseDevReadingModeResources, kBaseDevReadingModeResourcesSize),
+      base::make_span(kBaseOneReadingModeResources, kBaseOneReadingModeResourcesSize),
       IDR_BASEDEV_READING_BASEDEV_READING_HTML);
 
   source->OverrideContentSecurityPolicy(
@@ -167,22 +167,22 @@ BaseDevReadingModeUI::BaseDevReadingModeUI(content::WebUI* web_ui)
       "trusted-types static-types;");
 }
 
-BaseDevReadingModeUI::~BaseDevReadingModeUI() = default;
+BaseOneReadingModeUI::~BaseOneReadingModeUI() = default;
 
-WEB_UI_CONTROLLER_TYPE_IMPL(BaseDevReadingModeUI)
+WEB_UI_CONTROLLER_TYPE_IMPL(BaseOneReadingModeUI)
 
-void BaseDevReadingModeUI::BindInterface(
+void BaseOneReadingModeUI::BindInterface(
     mojo::PendingReceiver<basedev_reading::mojom::PageHandler> receiver) {
   receiver_.reset();
   receiver_.Bind(std::move(receiver));
 }
 
-void BaseDevReadingModeUI::ExtractContent(const GURL& url) {
+void BaseOneReadingModeUI::ExtractContent(const GURL& url) {
   // Content extraction logic
   OnContentExtracted("Sample Title", "<p>Sample content</p>", "Author", "Date");
 }
 
-void BaseDevReadingModeUI::OnContentExtracted(const std::string& title,
+void BaseOneReadingModeUI::OnContentExtracted(const std::string& title,
                                        const std::string& content,
                                        const std::string& author,
                                        const std::string& date) {
@@ -191,12 +191,12 @@ void BaseDevReadingModeUI::OnContentExtracted(const std::string& title,
   }
 }
 
-void BaseDevReadingModeUI::UpdateFontSize(int32_t size) {
+void BaseOneReadingModeUI::UpdateFontSize(int32_t size) {
   Profile* profile = Profile::FromWebUI(web_ui());
   profile->GetPrefs()->SetInteger("reading_mode.font_size", size);
 }
 
-void BaseDevReadingModeUI::UpdateTheme(const std::string& theme) {
+void BaseOneReadingModeUI::UpdateTheme(const std::string& theme) {
   Profile* profile = Profile::FromWebUI(web_ui());
   profile->GetPrefs()->SetString("reading_mode.theme", theme);
 }
@@ -244,18 +244,18 @@ Create: `chrome/browser/ui/views/side_panel/reading_mode_side_panel_coordinator.
 class Browser;
 class SidePanelRegistry;
 
-class BaseDevReadingModeSidePanelCoordinator
-    : public BrowserUserData<BaseDevReadingModeSidePanelCoordinator> {
+class BaseOneReadingModeSidePanelCoordinator
+    : public BrowserUserData<BaseOneReadingModeSidePanelCoordinator> {
  public:
-  explicit BaseDevReadingModeSidePanelCoordinator(Browser* browser);
-  ~BaseDevReadingModeSidePanelCoordinator() override;
+  explicit BaseOneReadingModeSidePanelCoordinator(Browser* browser);
+  ~BaseOneReadingModeSidePanelCoordinator() override;
 
   void CreateAndRegisterEntry(SidePanelRegistry* global_registry);
   void Toggle();
   bool IsAvailable() const;
 
  private:
-  friend class BrowserUserData<BaseDevReadingModeSidePanelCoordinator>;
+  friend class BrowserUserData<BaseOneReadingModeSidePanelCoordinator>;
 
   std::unique_ptr<views::View> CreateReadingModeWebView();
 
@@ -285,30 +285,30 @@ Create: `chrome/browser/ui/views/side_panel/reading_mode_side_panel_coordinator.
 #include "chrome/grit/generated_resources.h"
 #include "ui/base/l10n/l10n_util.h"
 
-BaseDevReadingModeSidePanelCoordinator::BaseDevReadingModeSidePanelCoordinator(
+BaseOneReadingModeSidePanelCoordinator::BaseOneReadingModeSidePanelCoordinator(
     Browser* browser)
     : browser_(browser) {}
 
-BaseDevReadingModeSidePanelCoordinator::~BaseDevReadingModeSidePanelCoordinator() = default;
+BaseOneReadingModeSidePanelCoordinator::~BaseOneReadingModeSidePanelCoordinator() = default;
 
-BROWSER_USER_DATA_KEY_IMPL(BaseDevReadingModeSidePanelCoordinator)
+BROWSER_USER_DATA_KEY_IMPL(BaseOneReadingModeSidePanelCoordinator)
 
-void BaseDevReadingModeSidePanelCoordinator::CreateAndRegisterEntry(
+void BaseOneReadingModeSidePanelCoordinator::CreateAndRegisterEntry(
     SidePanelRegistry* global_registry) {
   global_registry->Register(std::make_unique<SidePanelEntry>(
-      SidePanelEntry::Id::kBaseDevReadingMode,
+      SidePanelEntry::Id::kBaseOneReadingMode,
       l10n_util::GetStringUTF16(IDS_BASEDEV_READING_MODE_TITLE),
-      ui::ImageModel::FromVectorIcon(kBaseDevReadingModeIcon, ui::kColorIcon),
+      ui::ImageModel::FromVectorIcon(kBaseOneReadingModeIcon, ui::kColorIcon),
       base::BindRepeating(
-          &BaseDevReadingModeSidePanelCoordinator::CreateReadingModeWebView,
+          &BaseOneReadingModeSidePanelCoordinator::CreateReadingModeWebView,
           base::Unretained(this))));
 }
 
 std::unique_ptr<views::View>
-BaseDevReadingModeSidePanelCoordinator::CreateReadingModeWebView() {
-  auto web_view = std::make_unique<SidePanelWebUIViewT<BaseDevReadingModeUI>>(
+BaseOneReadingModeSidePanelCoordinator::CreateReadingModeWebView() {
+  auto web_view = std::make_unique<SidePanelWebUIViewT<BaseOneReadingModeUI>>(
       base::RepeatingClosure(), base::RepeatingClosure(),
-      std::make_unique<BubbleContentsWrapperT<BaseDevReadingModeUI>>(
+      std::make_unique<BubbleContentsWrapperT<BaseOneReadingModeUI>>(
           GURL(chrome::kChromeUIReadingModeSidePanelURL),
           browser_->profile(),
           IDS_BASEDEV_READING_MODE_TITLE));
@@ -317,21 +317,21 @@ BaseDevReadingModeSidePanelCoordinator::CreateReadingModeWebView() {
   return web_view;
 }
 
-void BaseDevReadingModeSidePanelCoordinator::Toggle() {
+void BaseOneReadingModeSidePanelCoordinator::Toggle() {
   auto* browser_view = BrowserView::GetBrowserViewForBrowser(browser_);
   if (!browser_view) return;
 
   auto* coordinator = browser_view->side_panel_coordinator();
   if (!coordinator) return;
 
-  if (coordinator->GetCurrentEntryId() == SidePanelEntry::Id::kBaseDevReadingMode) {
+  if (coordinator->GetCurrentEntryId() == SidePanelEntry::Id::kBaseOneReadingMode) {
     coordinator->Close();
   } else {
-    coordinator->Show(SidePanelEntry::Id::kBaseDevReadingMode);
+    coordinator->Show(SidePanelEntry::Id::kBaseOneReadingMode);
   }
 }
 
-bool BaseDevReadingModeSidePanelCoordinator::IsAvailable() const {
+bool BaseOneReadingModeSidePanelCoordinator::IsAvailable() const {
   content::WebContents* contents =
       browser_->tab_strip_model()->GetActiveWebContents();
   if (!contents) return false;
@@ -702,7 +702,7 @@ grit("resources") {
    }
 
 +  if (url.host_piece() == chrome::kChromeUIReadingModeSidePanelHost) {
-+    return &NewWebUI<BaseDevReadingModeUI>;
++    return &NewWebUI<BaseOneReadingModeUI>;
 +  }
 +
    if (url.host_piece() == chrome::kChromeUIHistoryURL) {
@@ -729,7 +729,7 @@ grit("resources") {
 
 +  // Initialize Reading Mode coordinator
 +  auto* reading_mode_coordinator =
-+      BaseDevReadingModeSidePanelCoordinator::GetOrCreateForBrowser(browser_.get());
++      BaseOneReadingModeSidePanelCoordinator::GetOrCreateForBrowser(browser_.get());
 +  reading_mode_coordinator->CreateAndRegisterEntry(
 +      side_panel_coordinator_->GetGlobalSidePanelRegistry());
  }

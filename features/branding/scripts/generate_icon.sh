@@ -1,5 +1,5 @@
 #!/bin/bash
-# Generate Base Dev icon from template
+# Generate BaseOne icon from template
 # This creates a simple colored icon placeholder
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,7 +7,7 @@ ICON_DIR="$SCRIPT_DIR/../icons"
 
 mkdir -p "$ICON_DIR"
 
-echo "Generating Base Dev icon placeholder..."
+echo "Generating BaseOne icon placeholder..."
 echo ""
 echo "To create custom icons:"
 echo "1. Design your icon in sizes: 16x16, 32x32, 128x128, 256x256, 512x512"
@@ -25,7 +25,7 @@ echo ""
 
 # Create placeholder README
 cat > "$ICON_DIR/README.md" << 'EOF'
-# Base Dev Icons
+# BaseOne Icons
 
 Place your custom icons here.
 

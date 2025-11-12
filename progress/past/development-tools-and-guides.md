@@ -16,7 +16,7 @@ Created comprehensive development tools and guides to accelerate Base Browser fe
 ## Goals
 
 - [x] Create automated side panel generator tool
-- [x] Establish BaseDev naming conventions
+- [x] Establish BaseOne naming conventions
 - [x] Write comprehensive side panel development guide
 - [x] Document all tools and workflows
 - [x] Make it easy for developers to add new features
@@ -52,7 +52,7 @@ guides/
 ### Phase 1: Research & Planning ✓
 - [x] Study Chromium side panel architecture
 - [x] Review existing guides (SIDEPANEL.md)
-- [x] Determine BaseDev naming strategy
+- [x] Determine BaseOne naming strategy
 - [x] Plan generator tool requirements
 
 ### Phase 2: Documentation ✓
@@ -209,4 +209,4 @@ Key design decisions:
 
 The `basedev_` naming convention is inspired by how Brave and Edge prefix their custom features. This pattern has proven effective for maintaining browser forks.
 
-Generated files include helpful comments marking them as "BaseDev" custom code, making it easy to identify our modifications when debugging or updating.
+Generated files include helpful comments marking them as "BaseOne" custom code, making it easy to identify our modifications when debugging or updating.

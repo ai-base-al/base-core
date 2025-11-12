@@ -73,7 +73,7 @@ echo "Total time: $((check_count * 30)) minutes" | tee -a "$MONITOR_LOG"
 echo "========================================" | tee -a "$MONITOR_LOG"
 
 # Notify completion (macOS notification)
-osascript -e "display notification \"Chromium build completed successfully!\" with title \"Base Dev Build\" sound name \"Glass\""
+osascript -e "display notification \"Chromium build completed successfully!\" with title \"BaseOne Build\" sound name \"Glass\""
 
 # Create completion marker
 echo "$(date)" > /Volumes/External/BaseChrome/base-core/.build_complete

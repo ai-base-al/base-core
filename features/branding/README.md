@@ -1,14 +1,14 @@
-# Branding Feature - "Base Dev"
+# Branding Feature - "BaseOne"
 
-Changes the browser name and icons from "Chromium" to "Base Dev".
+Changes the browser name and icons from "Chromium" to "BaseOne".
 
 ## What This Changes
 
-- **Product Name**: Chromium → Base Dev
-- **Application Name**: Chromium.app → Base Dev.app
-- **Window Title**: Shows "Base Dev" instead of "Chromium"
-- **About Box**: Base Dev branding
-- **Icons**: Custom Base Dev icons (blue/purple theme)
+- **Product Name**: Chromium → BaseOne
+- **Application Name**: Chromium.app → BaseOne.app
+- **Window Title**: Shows "BaseOne" instead of "Chromium"
+- **About Box**: BaseOne branding
+- **Icons**: Custom BaseOne icons (blue/purple theme)
 
 ## Files Modified
 
@@ -27,7 +27,7 @@ Changes the browser name and icons from "Chromium" to "Base Dev".
 cd ../..
 ./run/5_build_macos.sh -d
 
-# Result: Base Dev.app in build/src/out/Default/
+# Result: BaseOne.app in build/src/out/Default/
 ```
 
 ## Rollback

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Smart string replacement - Replace "Chromium" with "Base Dev" in user-facing strings
+# Smart string replacement - Replace "Chromium" with "BaseOne" in user-facing strings
 # This identifies the RIGHT strings to replace (not internal code references)
 
 set -e
@@ -67,7 +67,7 @@ for FILE in "${STRING_FILES[@]}"; do
         # Replace user-facing strings ONLY
         # These patterns are safe to replace:
 
-        # 1. Window titles - "Page Title - Chromium" → "Page Title - Base Dev"
+        # 1. Window titles - "Page Title - Chromium" → "Page Title - BaseOne"
         sed -i '' "s/ - Chromium</ - $PRODUCT_NAME</g" "$FILE" && ((CHANGES++))
         sed -i '' "s/>Chromium - />$PRODUCT_NAME - /g" "$FILE" && ((CHANGES++))
 
@@ -75,11 +75,11 @@ for FILE in "${STRING_FILES[@]}"; do
         # Keep attribution: "Copyright YEAR Base. Based on Chromium, Copyright The Chromium Authors."
         sed -i '' "s/Copyright <ph name=\"YEAR\">{0,date,y}<ex>[0-9]*<\/ex><\/ph> The Chromium Authors\./Copyright <ph name=\"YEAR\">{0,date,y}<ex>2025<\/ex><\/ph> $COMPANY_NAME. Based on Chromium, Copyright The Chromium Authors./g" "$FILE" && ((CHANGES++))
 
-        # 3. Product name in messages - "sign in to Chromium" → "sign in to Base Dev"
+        # 3. Product name in messages - "sign in to Chromium" → "sign in to BaseOne"
         sed -i '' "s/sign in to Chromium/sign in to $PRODUCT_NAME/g" "$FILE" && ((CHANGES++))
         sed -i '' "s/signed in to Chromium/signed in to $PRODUCT_NAME/g" "$FILE" && ((CHANGES++))
 
-        # 4. "Help make Chromium better" → "Help make Base Dev better"
+        # 4. "Help make Chromium better" → "Help make BaseOne better"
         sed -i '' "s/make Chromium better/make $PRODUCT_NAME better/g" "$FILE" && ((CHANGES++))
 
         # 5. "About Chromium" menu item
@@ -94,7 +94,7 @@ for FILE in "${STRING_FILES[@]}"; do
         sed -i '' "s/Chromium Enterprise/$PRODUCT_NAME Enterprise/g" "$FILE" && ((CHANGES++))
 
         # 7. About/Credits attribution - Keep Chromium project credit
-        # "Chromium is made possible" → "Base Dev is made possible by the Chromium open source project"
+        # "Chromium is made possible" → "BaseOne is made possible by the Chromium open source project"
         sed -i '' "s/Chromium is made possible by/$PRODUCT_NAME is made possible by the Chromium open source project and/g" "$FILE" && ((CHANGES++))
 
         # PHASE 2 REPLACEMENTS - Profile, Data, Sign-out, Additional UI

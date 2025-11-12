@@ -271,7 +271,7 @@ use_official_google_api_keys = false
 
 ### Token Storage
 
-**Location**: `~/Library/Application Support/Base Dev/Default/Tokens`
+**Location**: `~/Library/Application Support/BaseOne/Default/Tokens`
 
 **Format** (encrypted):
 ```json
@@ -292,7 +292,7 @@ use_official_google_api_keys = false
 
 **Profile Metadata**:
 ```
-~/Library/Application Support/Base Dev/
+~/Library/Application Support/BaseOne/
 ├── Default/                              # Profile directory
 │   ├── Preferences                       # Profile preferences
 │   ├── Tokens                            # OAuth tokens (encrypted)

@@ -83,7 +83,7 @@ patches/ungoogled-chromium/
 - Successfully built ungoogled-chromium 142.0.7444.134 for macOS ARM64
 - Created complete set of build automation scripts
 - Fixed Python 3.14 AST compatibility issues in depot_tools
-- Applied Base Dev branding via instant rename and patch system
+- Applied BaseOne branding via instant rename and patch system
 - Documented entire build workflow in MAP.md and BUILD_EXPECTATIONS.md
 
 ## Challenges & Solutions

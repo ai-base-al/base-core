@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate all Base Dev icons from SVG sources
+# Generate all BaseOne icons from SVG sources
 # Sources: /branding/base.svg (full logo) and /branding/base_browser.svg (icon only)
 # Output: /features/branding/icons/ (fresh generated icons)
 
@@ -18,7 +18,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 echo ""
-echo -e "${CYAN}${BOLD}🎨 Generating Base Dev Icons${NC}"
+echo -e "${CYAN}${BOLD}🎨 Generating BaseOne Icons${NC}"
 echo ""
 
 # Check dependencies

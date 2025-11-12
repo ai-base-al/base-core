@@ -11,14 +11,14 @@
 
 ## Overview
 
-Replace all Chromium branding with BaseDev branding throughout the browser. This includes string replacements (product names, company names, URLs), icons, logos, and all visual assets to create a cohesive BaseDev browser identity.
+Replace all Chromium branding with BaseOne branding throughout the browser. This includes string replacements (product names, company names, URLs), icons, logos, and all visual assets to create a cohesive BaseOne browser identity.
 
 ## Goals
 
-- [ ] Replace all Chromium/Google strings with BaseDev equivalents
+- [ ] Replace all Chromium/Google strings with BaseOne equivalents
 - [ ] Create custom icon set (app icons, favicons, splash screens)
 - [ ] Generate product logos for all sizes and contexts
-- [ ] Update About page and settings with BaseDev branding
+- [ ] Update About page and settings with BaseOne branding
 - [ ] Create branded installer/DMG
 - [ ] Ensure consistent branding across all platforms
 
@@ -48,8 +48,8 @@ patches/ungoogled-chromium/
 branding/
 ├── source/
 │   ├── app-icon.svg                    # Master app icon
-│   ├── logo.svg                        # BaseDev logo
-│   └── wordmark.svg                    # BaseDev wordmark
+│   ├── logo.svg                        # BaseOne logo
+│   └── wordmark.svg                    # BaseOne wordmark
 ├── generated/
 │   ├── icons/                          # All generated icon sizes
 │   ├── logos/                          # Logo variants
@@ -61,14 +61,14 @@ branding/
 
 chrome/app/theme/
 └── chromium/                           # Icon resources
-    └── (replaced with BaseDev icons)
+    └── (replaced with BaseOne icons)
 ```
 
 ## Implementation Plan
 
 ### Phase 1: String Replacement System
 - [ ] Audit all user-facing strings in Chromium
-- [ ] Create comprehensive string mapping (Chromium → BaseDev)
+- [ ] Create comprehensive string mapping (Chromium → BaseOne)
 - [ ] Generate patches for .grd/.grdp files
 - [ ] Update product name constants
 - [ ] Replace company/copyright information
@@ -76,8 +76,8 @@ chrome/app/theme/
 - [ ] Test string replacement in all UI contexts
 
 ### Phase 2: Icon & Logo Design
-- [ ] Design BaseDev app icon (1024x1024 master)
-- [ ] Design BaseDev logo (multiple variants)
+- [ ] Design BaseOne app icon (1024x1024 master)
+- [ ] Design BaseOne logo (multiple variants)
 - [ ] Design wordmark/text logo
 - [ ] Create icon generator script
 - [ ] Generate all required icon sizes:
@@ -136,7 +136,7 @@ chrome/app/theme/
   - Generated icons: branding/generated_icons/ (complete set)
   - Source SVGs: branding/*.svg (5 variants)
 - Apply string replacements to source files:
-  - chromium_strings.grd: Chromium → Base Dev (global sed replacement)
+  - chromium_strings.grd: Chromium → BaseOne (global sed replacement)
   - settings_strings.grdp: "You and Google" → "Your Account"
   - shared_settings_strings.grdp: "Sync and Google services" → "Sync and Services"
 - Update URLs: chrome://ungoogled-first-run → chrome://base-first-run
@@ -144,13 +144,13 @@ chrome/app/theme/
   - Modified chrome_browser_main.cc
   - Modified webui_url_constants.cc
 - Update macOS Info.plist files:
-  - Main app: CFBundleName, CFBundleDisplayName, CFBundleIdentifier → al.base.BaseDev
-  - Framework: CFBundleIdentifier → al.base.BaseDev.framework
-  - All 5 Helper apps: Bundle names → "Base Dev Helper", IDs → al.base.BaseDev.helper
+  - Main app: CFBundleName, CFBundleDisplayName, CFBundleIdentifier → al.base.BaseOne
+  - Framework: CFBundleIdentifier → al.base.BaseOne.framework
+  - All 5 Helper apps: Bundle names → "BaseOne Helper", IDs → al.base.BaseOne.helper
 - Update Assets.xcassets source files:
   - AppIcon.appiconset: Replaced all 7 icon sizes (16-1024px)
   - Icon.iconset: Replaced icon_256x256.png and @2x variant
-- Replace product_logo_32.png with Base Dev icon
+- Replace product_logo_32.png with BaseOne icon
 - Rebuilt browser to compile new Assets.car
 - **Known Issue**: Icon still showing as old Chromium in some contexts (deferred to later)
 
@@ -202,10 +202,10 @@ components/strings/components_strings.grd
 ```
 
 String categories:
-- Product names: "Chromium" → "BaseDev"
-- Company names: "The Chromium Authors" → "BaseDev Team"
+- Product names: "Chromium" → "BaseOne"
+- Company names: "The Chromium Authors" → "BaseOne Team"
 - URLs: chromium.org → basedev.example (TBD)
-- Support links: Updated to BaseDev resources
+- Support links: Updated to BaseOne resources
 - Copyright notices: Updated attribution
 
 ### Icon Specifications
@@ -248,10 +248,10 @@ Primary colors TBD:
 Branding constants to update:
 ```cpp
 // chrome/common/chrome_constants.h
-#define PRODUCT_NAME "BaseDev"
-#define PRODUCT_SHORT_NAME "BaseDev"
-#define COMPANY_NAME "BaseDev Team"
-#define COPYRIGHT_STRING "Copyright © 2025 BaseDev Team"
+#define PRODUCT_NAME "BaseOne"
+#define PRODUCT_SHORT_NAME "BaseOne"
+#define COMPANY_NAME "BaseOne Team"
+#define COPYRIGHT_STRING "Copyright © 2025 BaseOne Team"
 ```
 
 ### Integration Points
@@ -267,13 +267,13 @@ Branding constants to update:
 ### Test Plan
 - [ ] Visual inspection of all major UI areas
 - [ ] About page displays correct branding
-- [ ] Settings show BaseDev throughout
+- [ ] Settings show BaseOne throughout
 - [ ] No remaining "Chromium" strings visible
 - [ ] Icons display correctly at all sizes
 - [ ] Dock icon looks good
 - [ ] Favicon displays in tabs
-- [ ] Error pages show BaseDev branding
-- [ ] Crash reporter (if triggered) shows BaseDev
+- [ ] Error pages show BaseOne branding
+- [ ] Crash reporter (if triggered) shows BaseOne
 - [ ] DMG looks professional
 - [ ] Installation flow is branded
 
@@ -387,7 +387,7 @@ Branding constants to update:
 
 ### Immediate Actions
 1. **Design Phase**:
-   - [x] Create BaseDev logo design (base.svg created)
+   - [x] Create BaseOne logo design (base.svg created)
    - [x] Design app icon (base_browser.svg created)
    - [x] Define color palette (blue/purple gradient in existing SVGs)
    - [x] Create brand guidelines (documented in guides/BRANDING.md and branding/ASSETS.md)
@@ -485,8 +485,8 @@ Benefits:
 
 ### Questions to Resolve
 
-- [ ] Final product name: "BaseDev" or "Base Browser" or other?
-- [ ] Company name for copyright: "BaseDev Team" or specific entity?
+- [ ] Final product name: "BaseOne" or "Base Browser" or other?
+- [ ] Company name for copyright: "BaseOne Team" or specific entity?
 - [ ] Support/website URLs: Need actual domains
 - [ ] License/attribution approach: How to credit Chromium?
 - [ ] Update mechanism: Auto-updates or manual downloads?

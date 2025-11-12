@@ -100,16 +100,16 @@ PANEL_TITLE="$PANEL_NAME Mode"
 
 # Naming convention
 DIR_NAME="basedev_${PANEL_LOWER}"
-CLASS_PREFIX="BaseDev${PANEL_NAME}Mode"
+CLASS_PREFIX="BaseOne${PANEL_NAME}Mode"
 URL_HOST="basedev-${PANEL_LOWER}-side-panel"
-ENUM_ID="kBaseDev${PANEL_NAME}Mode"
+ENUM_ID="kBaseOne${PANEL_NAME}Mode"
 MOJOM_MODULE="basedev_${PANEL_LOWER}"
 RESOURCE_PREFIX="BASEDEV_${PANEL_UPPER}_MODE"
 PATCH_FILE="basedev-sidepanel-${PANEL_LOWER}.patch"
 
 echo ""
 echo -e "${CYAN}${BOLD}════════════════════════════════════════${NC}"
-echo -e "${CYAN}${BOLD}   BaseDev Side Panel Generator${NC}"
+echo -e "${CYAN}${BOLD}   BaseOne Side Panel Generator${NC}"
 echo -e "${CYAN}${BOLD}════════════════════════════════════════${NC}"
 echo ""
 echo -e "${BOLD}Panel Configuration:${NC}"
@@ -171,7 +171,7 @@ cat > "$WEBUI_DIR/${PANEL_LOWER}_ui.h" << EOF
 #include "mojo/public/cpp/bindings/receiver.h"
 #include "ui/webui/mojo_bubble_web_ui_controller.h"
 
-// BaseDev: ${PANEL_DESC}
+// BaseOne: ${PANEL_DESC}
 class ${CLASS_PREFIX}UI : public ui::MojoBubbleWebUIController,
                           public ${MOJOM_MODULE}::mojom::PageHandler {
  public:
@@ -250,7 +250,7 @@ void ${CLASS_PREFIX}UI::BindInterface(
 }
 
 void ${CLASS_PREFIX}UI::DoAction() {
-  // BaseDev: Implement your panel action here
+  // BaseOne: Implement your panel action here
   if (page_) {
     page_->OnActionComplete("Action completed");
   }
@@ -267,13 +267,13 @@ cat > "$WEBUI_DIR/${PANEL_LOWER}.mojom" << EOF
 
 module ${MOJOM_MODULE}.mojom;
 
-// BaseDev: Browser-side handler for ${PANEL_NAME} Mode panel
+// BaseOne: Browser-side handler for ${PANEL_NAME} Mode panel
 interface PageHandler {
   // Perform the main action
   DoAction();
 };
 
-// BaseDev: Renderer-side handler for responses from browser
+// BaseOne: Renderer-side handler for responses from browser
 interface Page {
   // Called when action is complete
   OnActionComplete(string result);
@@ -339,7 +339,7 @@ cat > "$COORD_DIR/${DIR_NAME}_side_panel_coordinator.h" << EOF
 class Browser;
 class SidePanelRegistry;
 
-// BaseDev: Coordinator for ${PANEL_NAME} Mode side panel
+// BaseOne: Coordinator for ${PANEL_NAME} Mode side panel
 class ${CLASS_PREFIX}SidePanelCoordinator
     : public BrowserUserData<${CLASS_PREFIX}SidePanelCoordinator> {
  public:
@@ -431,7 +431,7 @@ void ${CLASS_PREFIX}SidePanelCoordinator::Toggle() {
 }
 
 bool ${CLASS_PREFIX}SidePanelCoordinator::IsAvailable() const {
-  // BaseDev: Add your availability logic here
+  // BaseOne: Add your availability logic here
   return true;
 }
 EOF
@@ -632,7 +632,7 @@ ENTRY_FILE="$SRC_DIR/chrome/browser/ui/views/side_panel/side_panel_entry.h"
 # Add enum entry (find kBookmarks and add after it)
 perl -i -pe '
 if (/^\s*kBookmarks,\s*$/) {
-    $_ .= "    '"$ENUM_ID"',  // BaseDev: '"$PANEL_DESC"'\n";
+    $_ .= "    '"$ENUM_ID"',  // BaseOne: '"$PANEL_DESC"'\n";
 }
 ' "$ENTRY_FILE"
 
@@ -707,7 +707,7 @@ if (/#include "chrome\/browser\/ui\/views\/side_panel\/reading_list_side_panel_c
 # Add initialization
 perl -i -pe '
 if (/reading_list_coordinator->CreateAndRegisterEntry/) {
-    $_ .= "\n  // BaseDev: Initialize '"$PANEL_NAME"' Mode coordinator\n";
+    $_ .= "\n  // BaseOne: Initialize '"$PANEL_NAME"' Mode coordinator\n";
     $_ .= "  auto* ${PANEL_LOWER}_coordinator =\n";
     $_ .= "      '"${CLASS_PREFIX}"'SidePanelCoordinator::GetOrCreateForBrowser(browser_.get());\n";
     $_ .= "  ${PANEL_LOWER}_coordinator->CreateAndRegisterEntry(\n";

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Instantly apply Base Dev branding to existing Chromium.app
+# Instantly apply BaseOne branding to existing Chromium.app
 # No rebuild needed!
 
 set -e
@@ -31,15 +31,15 @@ fi
 cd "$APP_DIR"
 
 echo -e "${GREEN}✓${NC} Renaming app..."
-mv -n "Chromium.app" "Base Dev.app" 2>/dev/null || echo "  Already renamed"
+mv -n "Chromium.app" "BaseOne.app" 2>/dev/null || echo "  Already renamed"
 
 echo -e "${GREEN}✓${NC} Updating Info.plist..."
-/usr/libexec/PlistBuddy -c "Set :CFBundleName $PRODUCT_NAME" "Base Dev.app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "Base Dev.app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $PRODUCT_NAME" "Base Dev.app/Contents/Info.plist" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Set :CFBundleName $PRODUCT_NAME" "BaseOne.app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "BaseOne.app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $PRODUCT_NAME" "BaseOne.app/Contents/Info.plist" 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}${BOLD}✨ Done in 1 second!${NC}"
 echo ""
-echo -e "${BOLD}Test:${NC} open \"$APP_DIR/Base Dev.app\""
+echo -e "${BOLD}Test:${NC} open \"$APP_DIR/BaseOne.app\""
 echo ""
