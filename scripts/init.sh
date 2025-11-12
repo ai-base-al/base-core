@@ -52,7 +52,21 @@ if [ ! -d "$UNGOOGLED_DIR" ]; then
   echo "Please clone ungoogled-chromium-macos first:"
   echo "  cd $(dirname "$BASE_CORE_DIR")"
   echo "  git clone https://github.com/ungoogled-software/ungoogled-chromium-macos.git ungoogled-chromium"
+  echo "  cd ungoogled-chromium"
+  echo "  git submodule update --init --recursive"
   exit 1
+fi
+
+# Initialize git submodules if not already done
+if [ ! -f "$UNGOOGLED_DIR/ungoogled-chromium/utils/downloads.py" ]; then
+  echo "Initializing git submodules..."
+  cd "$UNGOOGLED_DIR"
+  git submodule update --init --recursive 2>&1 | tee -a "$LOG_FILE"
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to initialize git submodules"
+    exit 1
+  fi
+  cd "$BASE_CORE_DIR"
 fi
 
 # ============================================================================
