@@ -2,6 +2,8 @@
 
 Complete documentation for BaseOne's automatic update checking system using one.base.al API.
 
+**UPDATE**: See CHROMIUM_UPDATER_ANALYSIS.md for complete analysis of using Chromium's official updater system. This document describes a simpler lightweight implementation, while the analysis document describes leveraging Chromium's production-ready chrome/updater infrastructure (recommended approach).
+
 ## Overview
 
 BaseOne checks for updates automatically on startup and periodically, using the version API at https://one.base.al. This system:
@@ -9,6 +11,43 @@ BaseOne checks for updates automatically on startup and periodically, using the 
 - Checks one.base.al/api/version/check for updates
 - Shows non-intrusive notification when update available
 - Provides one-click download of new version
+
+## Implementation Approaches
+
+### Approach 1: Chromium's chrome/updater (Recommended)
+
+**Status**: Analyzed and documented in CHROMIUM_UPDATER_ANALYSIS.md
+
+**Pros**:
+- Production-ready, battle-tested system
+- Used by Microsoft Edge
+- Cross-platform (Windows, macOS, Linux)
+- Full Omaha protocol support
+- Separate updater service process
+- Differential updates support
+- Comprehensive testing infrastructure
+
+**Cons**:
+- More complex integration
+- Requires Omaha protocol compatibility in API
+- Larger binary size
+
+**See**: docs/CHROMIUM_UPDATER_ANALYSIS.md for complete implementation plan
+
+### Approach 2: Lightweight Custom Implementation (This Document)
+
+**Status**: Original simple implementation plan
+
+**Pros**:
+- Simpler to implement
+- Works with our current simple API
+- Minimal code changes
+- Full control over implementation
+
+**Cons**:
+- Need to build and maintain ourselves
+- No differential updates
+- Less robust than Chromium's system
 
 ## Architecture
 
