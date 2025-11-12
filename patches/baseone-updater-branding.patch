@@ -66,7 +66,7 @@
    extra_args_is_chrome_branded = "IS_CHROME_BRANDED=False"
 -  update_check_url = "https://omaha-qa.sandbox.google.com/service/update2/json"
 -  updater_event_logging_url = "https://play.googleapis.com/staging/log/"
-+  update_check_url = "https://one.base.al/api/version/check"
++  update_check_url = "https://one.base.al/service/update2/json"
 +  updater_event_logging_url = ""
  
    UpdaterLegacyLibGUID = "4C61BB05-94D1-4BAB-B69C-C34195AF92CA"
