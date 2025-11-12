@@ -1,1 +1,4 @@
 - Organize features in branches, merge to main when is done
+- one script one job
+- Allways use scripts, no custom build command!
+- ALWAYS create patch no direct modification in source code

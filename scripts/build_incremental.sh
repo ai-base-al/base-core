@@ -125,10 +125,15 @@ if ninja -C out/Default chrome; then
     fi
 
     echo ""
+    log "Backing up build artifacts..."
+    "$SCRIPT_DIR/backup_build.sh"
+
+    echo ""
     log "Next steps:"
     log "  1. Test the app: open '$OUT_DIR/BaseOne.app'"
-    log "  2. Create DMG: ./scripts/package.sh"
-    log "  3. Create release: ./scripts/release.sh -v 0.1.0 -c 'Codename'"
+    log "  2. If feature works: git commit"
+    log "  3. Create DMG: ./scripts/package.sh"
+    log "  4. Create release: ./scripts/release.sh -v 0.1.0 -c 'Codename'"
     echo ""
 
 else

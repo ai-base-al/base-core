@@ -2,6 +2,23 @@
 # Base Dev - Initial Setup Script
 # This script sets up a complete build environment from scratch
 # Run this only once or when setting up a new development machine
+#
+# ============================================================================
+# WARNING: THIS SCRIPT SHOULD ONLY BE RUN BY A HUMAN OPERATOR
+# ============================================================================
+# DO NOT run this script from:
+# - LLMs (Large Language Models)
+# - AI Agents
+# - Automated systems
+# - CI/CD pipelines
+#
+# This script:
+# 1. Calls ungoogled-chromium/build.sh which CLONES source code
+# 2. Takes 2-4 hours to complete
+# 3. Can OVERWRITE existing work if run accidentally
+#
+# For daily development, use: ./scripts/build_incremental.sh
+# ============================================================================
 
 set -e
 set -o pipefail  # Make pipeline errors propagate correctly
@@ -38,6 +55,58 @@ if [ ! -d "$UNGOOGLED_DIR" ]; then
   exit 1
 fi
 
+# ============================================================================
+# SAFETY CONFIRMATIONS - PREVENT ACCIDENTAL EXECUTION
+# ============================================================================
+
+echo ""
+echo "=========================================="
+echo "         DANGER - READ CAREFULLY"
+echo "=========================================="
+echo ""
+echo "This script will:"
+echo "  1. Clone Chromium source code (~10GB download)"
+echo "  2. Run a FULL build (2-4 hours)"
+echo "  3. Call ungoogled-chromium/build.sh (DANGEROUS)"
+echo ""
+echo "This should ONLY be run:"
+echo "  - On first-time setup"
+echo "  - By a HUMAN operator"
+echo "  - When you understand the consequences"
+echo ""
+echo "For daily development, use: ./scripts/build_incremental.sh"
+echo ""
+read -p "Do you want to continue? (y/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  echo "Cancelled. Good choice."
+  exit 0
+fi
+
+echo ""
+echo "=========================================="
+echo "       FINAL CONFIRMATION REQUIRED"
+echo "=========================================="
+echo ""
+echo "You are about to run a DANGEROUS operation that:"
+echo "  - Takes 2-4 hours"
+echo "  - Cannot be easily stopped"
+echo "  - Will overwrite existing builds"
+echo ""
+echo "Type 'CONFIRM' (all caps) to proceed, or anything else to cancel:"
+read -r CONFIRMATION
+
+if [ "$CONFIRMATION" != "CONFIRM" ]; then
+  echo ""
+  echo "Cancelled. You entered: '$CONFIRMATION'"
+  echo "You must type exactly: CONFIRM"
+  exit 0
+fi
+
+echo ""
+echo "Proceeding with full build setup..."
+echo ""
+
 # Check if source directory already exists
 if [ -d "$SRC_DIR" ]; then
   echo "Warning: Source directory already exists at $SRC_DIR"
@@ -72,22 +141,76 @@ else
 fi
 echo ""
 
-echo "Step 2: Building ungoogled-chromium"
-echo "Using -d flag to skip re-clone (just fetch updates)"
+echo "Step 2: Building Chromium"
 echo "This will take 2-4 hours..."
 echo ""
+echo "Note: This implements the chromium build workflow safely"
+echo "      Original ungoogled-chromium/build.sh has been removed (too dangerous)"
+echo "      Reference copy saved at: scripts/chromium/build.sh.reference"
+echo ""
 
+# Build using safe modular approach (see scripts/chromium/build.sh.reference)
 cd "$UNGOOGLED_DIR"
 export PYTHON=python3.13
-./build.sh -d 2>&1 | tee -a "$LOG_FILE"
+
+_root_dir="$UNGOOGLED_DIR"
+_download_cache="$_root_dir/build/download_cache"
+_src_dir="$_root_dir/build/src"
+_main_repo="$_root_dir/ungoogled-chromium"
+_arch="arm64"
+
+# Retrieve and unpack resources (skip clone with -d flag)
+echo "Retrieving dependencies..."
+"$_root_dir/retrieve_and_unpack_resource.sh" -d -g $_arch 2>&1 | tee -a "$LOG_FILE"
+
+mkdir -p "$_src_dir/out/Default"
+
+# Apply patches and substitutions
+echo "Applying ungoogled-chromium patches..."
+python3 "$_main_repo/utils/prune_binaries.py" "$_src_dir" "$_main_repo/pruning.list" 2>&1 | tee -a "$LOG_FILE"
+python3 "$_main_repo/utils/patches.py" apply "$_src_dir" "$_main_repo/patches" "$_root_dir/patches" 2>&1 | tee -a "$LOG_FILE"
+
+# Apply tarball fix if needed
+patch -p1 -d "$_src_dir" < "$_root_dir/patches/ungoogled-chromium/macos/tarball-fix-dawn-commit-hash.patch" 2>&1 | tee -a "$LOG_FILE" || true
+
+echo "Applying domain substitutions..."
+python3 "$_main_repo/utils/domain_substitution.py" apply -r "$_main_repo/domain_regex.list" -f "$_main_repo/domain_substitution.list" "$_src_dir" 2>&1 | tee -a "$LOG_FILE"
+
+# Set build flags
+cat "$_main_repo/flags.gn" "$_root_dir/flags.macos.gn" > "$_src_dir/out/Default/args.gn"
+echo 'target_cpu = "arm64"' >> "$_src_dir/out/Default/args.gn"
+
+mkdir -p "$_src_dir/third_party/llvm-build/Release+Asserts"
+mkdir -p "$_src_dir/third_party/rust-toolchain/bin"
+
+echo "Unpacking build tools..."
+"$_root_dir/retrieve_and_unpack_resource.sh" -p $_arch 2>&1 | tee -a "$LOG_FILE"
+
+cd "$_src_dir"
+
+echo "Bootstrapping GN..."
+./tools/gn/bootstrap/bootstrap.py -o out/Default/gn --skip-generate-buildfiles 2>&1 | tee -a "$LOG_FILE"
+
+echo "Building Rust bindgen..."
+./tools/rust/build_bindgen.py --skip-test 2>&1 | tee -a "$LOG_FILE"
+
+echo "Generating build files..."
+./out/Default/gn gen out/Default --fail-on-unused-args 2>&1 | tee -a "$LOG_FILE"
+
+echo "Building Chrome (this takes 2-4 hours)..."
+ninja -C out/Default chrome chromedriver 2>&1 | tee -a "$LOG_FILE"
 BUILD_EXIT=$?
 
 if [ $BUILD_EXIT -ne 0 ]; then
   echo ""
-  echo "ERROR: ungoogled-chromium build failed with exit code $BUILD_EXIT"
+  echo "ERROR: Chromium build failed with exit code $BUILD_EXIT"
   echo "Check logs/build.log for details"
   exit 1
 fi
+
+echo "Signing and packaging..."
+cd "$UNGOOGLED_DIR"
+"$_root_dir/sign_and_package_app.sh" 2>&1 | tee -a "$LOG_FILE"
 
 BUILD_SRC="$UNGOOGLED_DIR/build/src"
 echo "Build completed at: $BUILD_SRC"
