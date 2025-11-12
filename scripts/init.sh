@@ -25,7 +25,7 @@ set -o pipefail  # Make pipeline errors propagate correctly
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_CORE_DIR="$(dirname "$SCRIPT_DIR")"
-UNGOOGLED_DIR="$(dirname "$BASE_CORE_DIR")/ungoogled-chromium"
+UNGOOGLED_DIR="$(dirname "$BASE_CORE_DIR")/ungoogled-chromium-macos"
 SRC_DIR="$BASE_CORE_DIR/src"
 LOGS_DIR="$BASE_CORE_DIR/logs"
 LOG_FILE="$LOGS_DIR/build.log"
@@ -45,16 +45,24 @@ echo "ungoogled-chromium directory: $UNGOOGLED_DIR"
 echo "Source directory: $SRC_DIR"
 echo ""
 
-# Check if ungoogled-chromium exists
+# Check if ungoogled-chromium exists, clone if not
 if [ ! -d "$UNGOOGLED_DIR" ]; then
-  echo "Error: ungoogled-chromium directory not found at $UNGOOGLED_DIR"
+  echo "ungoogled-chromium-macos directory not found at $UNGOOGLED_DIR"
+  echo "Cloning ungoogled-chromium-macos repository..."
   echo ""
-  echo "Please clone ungoogled-chromium-macos first:"
-  echo "  cd $(dirname "$BASE_CORE_DIR")"
-  echo "  git clone https://github.com/ungoogled-software/ungoogled-chromium-macos.git ungoogled-chromium"
-  echo "  cd ungoogled-chromium"
-  echo "  git submodule update --init --recursive"
-  exit 1
+
+  PARENT_DIR="$(dirname "$BASE_CORE_DIR")"
+  cd "$PARENT_DIR"
+
+  if git clone https://github.com/ungoogled-software/ungoogled-chromium-macos.git ungoogled-chromium-macos; then
+    echo "Successfully cloned ungoogled-chromium-macos"
+    echo ""
+  else
+    echo "ERROR: Failed to clone ungoogled-chromium-macos"
+    exit 1
+  fi
+
+  cd "$BASE_CORE_DIR"
 fi
 
 # Initialize git submodules if not already done
