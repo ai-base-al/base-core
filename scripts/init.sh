@@ -59,6 +59,14 @@ if [ ! -d "$UNGOOGLED_DIR" ]; then
     echo ""
   else
     echo "ERROR: Failed to clone ungoogled-chromium-macos"
+    echo ""
+    echo "Please clone manually:"
+    echo "  cd $PARENT_DIR"
+    echo "  git clone https://github.com/ungoogled-software/ungoogled-chromium-macos.git ungoogled-chromium-macos"
+    echo "  cd ungoogled-chromium-macos"
+    echo "  git submodule update --init --recursive"
+    echo ""
+    echo "Then run this script again."
     exit 1
   fi
 
