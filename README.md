@@ -1,6 +1,6 @@
-# Base Dev - Custom Chromium Browser
+# BaseOne - Custom Chromium Browser
 
-Base Dev is a custom Chromium-based browser built on ungoogled-chromium, featuring privacy-first defaults and custom development tools.
+BaseOne is a custom Chromium-based browser built on ungoogled-chromium, featuring privacy-first defaults and custom development tools.
 
 ## Repository Structure
 
@@ -12,17 +12,17 @@ This repository uses a Brave/Edge-style structure where ungoogled-chromium is ke
 │   └── build/src/              # Chromium source (stays here permanently!)
 └── base-core/                   # This repository
     ├── src -> ../ungoogled-chromium/build/src  # Symlink to source
-    ├── patches/                 # Base Dev custom patches
+    ├── patches/                 # BaseOne custom patches
     │   ├── series              # Patch application order
     │   └── *.patch             # Individual patch files
-    ├── scripts/                # Build and development scripts
-    │   ├── clone.sh           # Clone Chromium (run once)
-    │   ├── init.sh            # Full setup workflow
-    │   ├── build.sh           # Incremental build (10-30 min)
-    │   ├── patch.sh           # Apply patches only
-    │   └── sync.sh            # Update ungoogled-chromium
+    ├── scripts/                        # Build and development scripts
+    │   ├── init.sh                    # Full setup workflow (2-4 hours)
+    │   ├── build_incremental.sh       # Incremental build (10-30 min)
+    │   ├── apply_baseone_branding.sh  # Apply branding
+    │   ├── backup_build.sh            # Backup built browser
+    │   └── restore_build.sh           # Restore backed up browser
     ├── tools/                  # Development tools
-    ├── branding/              # Base Dev branding assets
+    ├── branding/              # BaseOne branding assets
     ├── backups/               # Built browser backups
     ├── logs/                  # Build logs
     └── guides/                # Development documentation
@@ -41,8 +41,8 @@ cd base-core
 
 This will:
 1. Build ungoogled-chromium from scratch (2-4 hours)
-2. Apply Base Dev patches
-3. Build the browser with Base Dev customizations
+2. Apply BaseOne patches
+3. Build the browser with BaseOne customizations
 
 ### Daily Development Workflow
 
@@ -52,13 +52,10 @@ For regular feature development (incremental builds):
 # 1. Make your changes to source files in src/
 vim src/chrome/browser/ui/...
 
-# 2. Apply your patch (if you have one)
-./scripts/patch.sh
+# 2. Build (only recompiles changed files, 10-30 min)
+./scripts/build_incremental.sh
 
-# 3. Build (only recompiles changed files, 10-30 min)
-./scripts/build.sh
-
-# 4. Run the browser
+# 3. Run the browser
 open "src/out/Default/Base Dev.app"
 ```
 
@@ -74,17 +71,14 @@ This will:
 1. Backup current build
 2. Update ungoogled-chromium
 3. Perform full rebuild (2-4 hours)
-4. Apply Base Dev patches
+4. Apply BaseOne patches
 
 ## Build Scripts
 
 | Script | Purpose | Time | When to Use |
 |--------|---------|------|-------------|
-| `clone.sh` | Clone Chromium source | 30-60 min | First time only (never again!) |
 | `init.sh` | Full build workflow | 2-4 hours | First time or complete rebuild |
-| `build.sh` | Incremental build | 10-30 min | Daily development (most common) |
-| `patch.sh` | Apply patches only | <1 min | After editing patches |
-| `sync.sh` | Update Chromium | 2-4 hours | Monthly/when updating upstream |
+| `build_incremental.sh` | Incremental build | 10-30 min | Daily development (most common) |
 
 All build scripts automatically log output to `logs/build.log`. Monitor progress:
 ```bash
@@ -118,8 +112,7 @@ This automatically:
 
 After generation:
 ```bash
-./scripts/patch.sh  # Apply the new patch
-./scripts/build.sh  # Build with new feature
+./scripts/build_incremental.sh  # Build with new feature
 ```
 
 ### Manual Feature Development
@@ -136,21 +129,21 @@ For custom features beyond sidepanels:
    mv 0001-*.patch ../patches/basedev-feature-x.patch
    echo "basedev-feature-x.patch" >> ../patches/series
    ```
-3. Build: `./scripts/build.sh`
+3. Build: `./scripts/build_incremental.sh`
 
 ## Naming Convention
 
-All custom Base Dev features use the `basedev_` prefix:
+All custom BaseOne features use the `basedev_` prefix:
 
 - **Patches**: `basedev-{category}-{feature}.patch`
 - **Directories**: `basedev_{feature}/`
-- **C++ Classes**: `BaseDev{Feature}{Component}`
+- **C++ Classes**: `BaseOne{Feature}{Component}`
 - **URLs**: `chrome://basedev-{feature}/`
 
 Example: Test sidepanel feature
 - Patch: `basedev-sidepanel-test-minimal.patch`
-- Button: `BaseDevTestButton`
-- Coordinator: `BaseDevTestCoordinator`
+- Button: `BaseOneTestButton`
+- Coordinator: `BaseOneTestCoordinator`
 - Files: `basedev_test_button.{h,cc}`
 
 See `guides/BASEDEV_NAMING.md` for complete reference.
@@ -177,12 +170,12 @@ ungoogled-chromium/build/src/
 ├── content/            # Content layer
 ├── ui/                 # UI framework
 └── out/Default/        # Build output
-    └── Base Dev.app    # Built browser
+    └── BaseOne.app    # Built browser
 ```
 
-### `patches/` - Base Dev Patches
+### `patches/` - BaseOne Patches
 
-Custom patches that add Base Dev features:
+Custom patches that add BaseOne features:
 
 ```
 patches/
@@ -198,7 +191,7 @@ Built browser binaries saved for quick restoration:
 ```bash
 backups/
 ├── Releases/                    # Release builds
-│   └── Base Dev.app            # Latest working build
+│   └── BaseOne.app            # Latest working build
 └── ungoogled-chromium_*.dmg    # DMG archives
 ```
 
@@ -233,13 +226,13 @@ ungoogled-chromium patches
          ↓
     Chromium source
          ↓
-   Base Dev patches (patches/)
+   BaseOne patches (patches/)
          ↓
    Working tree (src/)
          ↓
    Incremental build
          ↓
-   Base Dev.app
+   BaseOne.app
 ```
 
 ## Common Tasks
@@ -276,7 +269,7 @@ mv 0001-*.patch ../patches/basedev-feature-x.patch
 
 # 4. Rebuild
 cd ..
-./scripts/build.sh
+./scripts/build_incremental.sh
 ```
 
 ### Run Browser with Logging
@@ -324,7 +317,7 @@ When adding new features:
 
 ## License
 
-Base Dev includes code from:
+BaseOne includes code from:
 - Chromium (BSD-3-Clause)
 - ungoogled-chromium (BSD-3-Clause)
 

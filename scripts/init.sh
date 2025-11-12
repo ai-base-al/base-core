@@ -1,5 +1,5 @@
 #!/bin/bash
-# Base Dev - Initial Setup Script
+# BaseOne - Initial Setup Script
 # This script sets up a complete build environment from scratch
 # Run this only once or when setting up a new development machine
 #
@@ -33,7 +33,7 @@ LOG_FILE="$LOGS_DIR/build.log"
 # Create logs directory if it doesn't exist
 mkdir -p "$LOGS_DIR"
 
-echo "Base Dev - Initial Setup"
+echo "BaseOne - Initial Setup"
 echo "Log file: $LOG_FILE"
 echo "========================"
 echo ""
@@ -100,11 +100,11 @@ if [ ! -f "$UNGOOGLED_DIR/ungoogled-chromium/utils/downloads.py" ]; then
   echo "   - Applies ungoogled-chromium patches"
   echo "   - Builds base browser with: ninja -C out/Default chrome"
   echo ""
-  echo "3. Apply Base Dev patches"
+  echo "3. Apply BaseOne patches"
   echo "   - Applies custom patches from: patches/"
   echo "   - Runs: ./scripts/patch.sh"
   echo ""
-  echo "4. Rebuild with Base Dev branding"
+  echo "4. Rebuild with BaseOne branding"
   echo "   - Incremental rebuild with Base branding"
   echo "   - Runs: ./scripts/build.sh"
   echo ""
@@ -174,7 +174,7 @@ if [ -d "$SRC_DIR" ]; then
     echo ""
   else
     echo "Keeping existing source directory"
-    echo "If you want to rebuild, use ./scripts/build.sh instead"
+    echo "If you want to rebuild, use ./scripts/build_incremental.sh instead"
     exit 0
   fi
 fi
@@ -341,21 +341,11 @@ BUILD_SRC="$UNGOOGLED_DIR/build/src"
 echo "Build completed at: $BUILD_SRC"
 
 echo ""
-echo "Step 3: Applying Base Dev patches"
-cd "$BASE_CORE_DIR"
-./scripts/patch.sh
-if [ $? -ne 0 ]; then
-  echo "ERROR: Patch application failed"
-  exit 1
-fi
+echo "Step 3: BaseOne patches can be applied with patches/ directory"
+echo "(Note: Currently patches must be applied manually - see patches/series)"
 
 echo ""
-echo "Step 4: Rebuilding with Base Dev patches"
-./scripts/build.sh
-if [ $? -ne 0 ]; then
-  echo "ERROR: Build failed"
-  exit 1
-fi
+echo "Step 4: For incremental rebuilds, use: ./scripts/build_incremental.sh"
 
 echo ""
 echo "=========================================="
@@ -364,10 +354,10 @@ echo "=========================================="
 echo ""
 echo "Source location: $BUILD_SRC"
 echo "Symlink: $SRC_DIR -> $BUILD_SRC"
-echo "Browser location: $BUILD_SRC/out/Default/Base Dev.app"
+echo "Browser location: $BUILD_SRC/out/Default/BaseOne.app"
 echo ""
 echo "To run the browser:"
-echo "  open \"$BUILD_SRC/out/Default/Base Dev.app\""
+echo "  open \"$BUILD_SRC/out/Default/BaseOne.app\""
 echo ""
 echo "For daily development:"
 echo "  - Make your changes to source files in $BUILD_SRC"
