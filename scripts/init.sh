@@ -122,15 +122,8 @@ if [ -d "$SRC_DIR" ]; then
   fi
 fi
 
-echo "Step 1: Checking/cloning Chromium source"
-if [ ! -d "$UNGOOGLED_DIR/build/src/.git" ]; then
-  echo "Source not found, running clone script..."
-  "$SCRIPT_DIR/clone.sh" 2>&1 | tee -a "$LOG_FILE"
-  if [ $? -ne 0 ]; then
-    echo "ERROR: Clone failed"
-    exit 1
-  fi
-else
+echo "Step 1: Checking Chromium source"
+if [ -d "$UNGOOGLED_DIR/build/src/.git" ]; then
   echo "Source already exists at $UNGOOGLED_DIR/build/src"
 
   # Ensure symlink exists
@@ -138,6 +131,8 @@ else
     echo "Creating symlink: $SRC_DIR -> $UNGOOGLED_DIR/build/src"
     ln -s "$UNGOOGLED_DIR/build/src" "$SRC_DIR"
   fi
+else
+  echo "Source not found - will be cloned by retrieve_and_unpack_resource.sh"
 fi
 echo ""
 
