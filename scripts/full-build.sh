@@ -4,14 +4,19 @@
 # Product: Base Dev
 #
 # This script performs a full build of the browser.
-# Run this after init.sh or when you need a complete rebuild.
+# Run this after init.sh completes.
 # Build time: 2-4 hours
+#
+# One script, one job: This ONLY builds (ninja). It does NOT initialize.
+# Run init.sh first to initialize the environment.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 UNGOOGLED_DIR="$(dirname "$BASE_DIR")/ungoogled-chromium-macos"
+SRC_DIR="$UNGOOGLED_DIR/build/src"
+OUT_DIR="$SRC_DIR/out/Default"
 LOG_FILE="$BASE_DIR/logs/build.log"
 
 # Colors
@@ -43,37 +48,51 @@ echo "Base Browser - Full Build"
 echo "==========================================="
 echo ""
 
-# Check if ungoogled-chromium directory exists
-if [ ! -d "$UNGOOGLED_DIR" ]; then
-    error "ungoogled-chromium directory not found: $UNGOOGLED_DIR"
+# Check if source directory exists
+if [ ! -d "$SRC_DIR" ]; then
+    error "Source directory not found: $SRC_DIR"
     echo ""
     echo "Run initialization first:"
     echo "  ./scripts/init.sh"
     exit 1
 fi
 
-# Check if build.sh exists
-if [ ! -f "$UNGOOGLED_DIR/build.sh" ]; then
-    error "Build script not found: $UNGOOGLED_DIR/build.sh"
+# Check if out directory exists
+if [ ! -d "$OUT_DIR" ]; then
+    error "Build directory not found: $OUT_DIR"
+    echo ""
+    echo "Run initialization first:"
+    echo "  ./scripts/init.sh"
+    exit 1
+fi
+
+# Check if args.gn exists (means GN was run)
+if [ ! -f "$OUT_DIR/args.gn" ]; then
+    error "Build not configured: $OUT_DIR/args.gn not found"
+    echo ""
+    echo "Run initialization first:"
+    echo "  ./scripts/init.sh"
+    exit 1
 fi
 
 mkdir -p "$BASE_DIR/logs"
 
 log "Starting full build (this will take 2-4 hours)..."
 log "Build log: $LOG_FILE"
+log "Source: $SRC_DIR"
+log "Output: $OUT_DIR"
 echo ""
 
 # Start build with timestamp
 START_TIME=$(date +%s)
 
-cd "$UNGOOGLED_DIR"
-export PYTHON=python3.13
+cd "$SRC_DIR"
 
-log "Running: ungoogled-chromium/build.sh"
+log "Running: ninja -C out/Default chrome chromedriver"
 echo ""
 
-# Run ungoogled-chromium build script
-if ./build.sh 2>&1 | tee "$LOG_FILE"; then
+# Run ninja build
+if ninja -C out/Default chrome chromedriver 2>&1 | tee "$LOG_FILE"; then
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
     MINUTES=$((DURATION / 60))
@@ -87,9 +106,6 @@ if ./build.sh 2>&1 | tee "$LOG_FILE"; then
     log "Build time: ${MINUTES}m ${SECONDS}s"
 
     # Check if browser was built
-    BUILD_SRC="$UNGOOGLED_DIR/build/src"
-    OUT_DIR="$BUILD_SRC/out/Default"
-
     if [ -d "$OUT_DIR/Chromium.app" ]; then
         APP_SIZE=$(du -sh "$OUT_DIR/Chromium.app" | cut -f1)
         log "Built app: $OUT_DIR/Chromium.app"
@@ -98,8 +114,9 @@ if ./build.sh 2>&1 | tee "$LOG_FILE"; then
 
     echo ""
     log "Next steps:"
-    log "  1. Test the browser: open '$OUT_DIR/Chromium.app'"
-    log "  2. For daily development: ./scripts/build_incremental.sh"
+    log "  1. Apply Base Dev branding: ./scripts/apply_base.sh"
+    log "  2. Test the browser: open '$OUT_DIR/Chromium.app'"
+    log "  3. For daily development: ./scripts/build_incremental.sh"
     echo ""
 
 else

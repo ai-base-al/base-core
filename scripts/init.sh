@@ -13,7 +13,7 @@
 # - CI/CD pipelines
 #
 # This script:
-# 1. Calls ungoogled-chromium/build.sh which CLONES source code
+# 1. Calls ungoogled-chromium-macos/build.sh which CLONES source code
 # 2. Takes 2-4 hours to complete
 # 3. Can OVERWRITE existing work if run accidentally
 #
@@ -37,8 +37,11 @@ echo "BaseOne - Initial Setup"
 echo "Log file: $LOG_FILE"
 echo "========================"
 echo ""
-echo "This will set up a complete build environment"
-echo "Expected time: 2-4 hours (includes full Chromium build)"
+echo "WARNING: This script ONLY initializes the build environment"
+echo "Expected time: 10-30 minutes (does NOT include build)"
+echo ""
+echo "After initialization completes, you MUST run:"
+echo "  ./scripts/full-build.sh  (2-4 hours for full build)"
 echo ""
 echo "Base Core directory: $BASE_CORE_DIR"
 echo "ungoogled-chromium directory: $UNGOOGLED_DIR"
@@ -93,22 +96,18 @@ if [ ! -f "$UNGOOGLED_DIR/ungoogled-chromium/utils/downloads.py" ]; then
   echo "Next steps: This script will now automatically:"
   echo ""
   echo "1. Download Chromium source (~10GB)"
-  echo "   - Uses: ungoogled-chromium/retrieve_and_unpack_resource.sh"
+  echo "   - Uses: ungoogled-chromium-macos/retrieve_and_unpack_resource.sh"
   echo "   - Downloads source code, dependencies, and build tools"
   echo ""
   echo "2. Build vanilla Chromium (2-4 hours)"
   echo "   - Applies ungoogled-chromium patches"
   echo "   - Builds base browser with: ninja -C out/Default chrome"
   echo ""
-  echo "3. Apply BaseOne patches"
-  echo "   - Applies custom patches from: patches/"
-  echo "   - Runs: ./scripts/patch.sh"
   echo ""
-  echo "4. Rebuild with BaseOne branding"
-  echo "   - Incremental rebuild with Base branding"
-  echo "   - Runs: ./scripts/build.sh"
-  echo ""
-  echo "Total time: 2-4 hours | Log: logs/build.log"
+  echo "Note: init.sh only initializes the environment"
+  echo "After initialization, run:"
+  echo "  ./scripts/full-build.sh          # Full build (2-4 hours)"
+  echo "  ./scripts/build_incremental.sh   # Incremental builds (10-30 min)"
   echo ""
   cd "$BASE_CORE_DIR"
 fi
@@ -183,16 +182,15 @@ echo "This script will:"
 echo "  1. Download Chromium source (~10GB) if not present"
 echo "  2. Apply ungoogled-chromium patches"
 echo "  3. Apply BaseOne custom patches (listed above)"
-echo "  4. Build full Chromium (2-4 hours)"
+echo "  4. Configure build environment (GN, Rust bindgen, etc.)"
 echo ""
-read -p "Continue with full build? (y/N) " -n 1 -r
+echo "Note: This does NOT build Chromium. After init completes:"
+echo "  Run: ./scripts/full-build.sh  (2-4 hours)"
+echo ""
+read -p "Continue with initialization? (y/N) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo "Build cancelled."
-  echo ""
-  echo "To build manually:"
-  echo "  - Apply patches: ./scripts/patch.sh"
-  echo "  - Build incrementally: ./scripts/build.sh"
+  echo "Initialization cancelled."
   exit 0
 fi
 
@@ -202,20 +200,22 @@ fi
 
 echo ""
 echo "=========================================="
-echo "         DANGER - READ CAREFULLY"
+echo "         IMPORTANT - READ CAREFULLY"
 echo "=========================================="
 echo ""
 echo "This script will:"
-echo "  1. Clone Chromium source code (~10GB download)"
-echo "  2. Run a FULL build (2-4 hours)"
-echo "  3. Call ungoogled-chromium/build.sh (DANGEROUS)"
+echo "  1. Download Chromium source (~10GB) if not present"
+echo "  2. Initialize git submodules"
+echo "  3. Apply ungoogled-chromium patches"
+echo "  4. Configure build environment (bootstrap GN, Rust bindgen)"
+echo ""
+echo "This does NOT build Chromium. After initialization:"
+echo "  Run: ./scripts/full-build.sh  (2-4 hours)"
 echo ""
 echo "This should ONLY be run:"
 echo "  - On first-time setup"
 echo "  - By a HUMAN operator"
 echo "  - When you understand the consequences"
-echo ""
-echo "For daily development, use: ./scripts/build_incremental.sh"
 echo ""
 read -p "Do you want to continue? (y/N) " -n 1 -r
 echo
