@@ -45,6 +45,16 @@ echo ""
 # Check if source directory exists
 if [ ! -d "$SRC_DIR" ]; then
     error "Source directory not found: $SRC_DIR"
+    echo ""
+    echo "You need to run a full build first with:"
+    echo "  ./scripts/init.sh"
+    echo ""
+    echo "The init.sh script will:"
+    echo "  1. Clone ungoogled-chromium-macos repository"
+    echo "  2. Download Chromium source (~10GB)"
+    echo "  3. Build Chromium (2-4 hours)"
+    echo ""
+    exit 1
 fi
 
 # Check if out directory exists
