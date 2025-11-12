@@ -54,15 +54,49 @@ for file in $GRD_FILES; do
     fi
 done
 
+# Apply version update
+echo "1. Updating version information..."
+BASEONE_VERSION=$(cat "$BASE_DIR/VERSION" 2>/dev/null || echo "0.1.0")
+CHROMIUM_VERSION=$(cat "$SRC_DIR/chrome/VERSION" 2>/dev/null | grep -E "MAJOR|MINOR|BUILD|PATCH" | tr '\n' '.' | sed 's/MAJOR=//;s/MINOR=//;s/BUILD=//;s/PATCH=//;s/\.\././g;s/\.$//')
+
+echo "   BaseOne version: $BASEONE_VERSION"
+echo "   Chromium version: $CHROMIUM_VERSION"
+
+# Backup original VERSION file
+if [ ! -f "$SRC_DIR/chrome/VERSION.bak" ]; then
+    cp "$SRC_DIR/chrome/VERSION" "$SRC_DIR/chrome/VERSION.bak"
+fi
+
+# Update VERSION file with BaseOne version
+# Parse BaseOne version
+if [[ "$BASEONE_VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    MAJOR="${BASH_REMATCH[1]}"
+    MINOR="${BASH_REMATCH[2]}"
+    BUILD="${BASH_REMATCH[3]}"
+    PATCH="0"
+
+    cat > "$SRC_DIR/chrome/VERSION" << EOF
+MAJOR=$MAJOR
+MINOR=$MINOR
+BUILD=$BUILD
+PATCH=$PATCH
+EOF
+
+    echo "   Updated chrome/VERSION with BaseOne version $BASEONE_VERSION"
+else
+    echo "   WARNING: Invalid BaseOne version format, keeping Chromium version"
+fi
+echo ""
+
 # Apply string replacements
-echo "Applying branding replacements..."
+echo "2. Applying branding replacements..."
 echo ""
 
 # Count replacements
 TOTAL=0
 
 # Replace "Chromium" with "BaseOne" (case-sensitive, preserves XML)
-echo "1. Replacing 'Chromium' → 'BaseOne'..."
+echo "   Replacing 'Chromium' → 'BaseOne'..."
 for file in $GRD_FILES; do
     if [ -f "$file" ]; then
         COUNT=$(grep -o "Chromium" "$file" 2>/dev/null | wc -l | tr -d ' ')
@@ -78,7 +112,7 @@ echo "   Total: $TOTAL replacements"
 echo ""
 
 # Update copyright strings
-echo "2. Updating copyright strings with BaseCode LLC..."
+echo "3. Updating copyright strings with BaseCode LLC..."
 COUNT=0
 for file in $GRD_FILES; do
     if [ -f "$file" ]; then
@@ -96,7 +130,7 @@ echo "   Total: $COUNT files updated"
 echo ""
 
 # Apply icon branding
-echo "3. Replacing app icons with BaseOne icons..."
+echo "4. Replacing app icons with BaseOne icons..."
 ICON_SRC="$BASE_DIR/features/branding/icons"
 ICON_DST="$SRC_DIR/chrome/app/theme/chromium/mac/Assets.xcassets/AppIcon.appiconset"
 
@@ -144,7 +178,7 @@ fi
 echo ""
 
 # Copy product_logo_32.png (needed for chrome://theme/current-channel-logo)
-echo "4. Copying product_logo_32.png for theme system..."
+echo "5. Copying product_logo_32.png for theme system..."
 if [ -f "$ICON_SRC/base_icon_32.png" ]; then
     cp "$ICON_SRC/base_icon_32.png" "$SRC_DIR/chrome/app/theme/chromium/product_logo_32.png"
     echo "   product_logo_32.png copied (needed for chrome://theme/current-channel-logo)"
@@ -154,7 +188,7 @@ fi
 echo ""
 
 # Copy Linux product logos
-echo "5. Copying Linux product logos..."
+echo "6. Copying Linux product logos..."
 if [ -d "$SRC_DIR/chrome/app/theme/chromium/linux" ]; then
     cp "$ICON_SRC/base_icon_32.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_24.png"
     cp "$ICON_SRC/base_icon_64.png" "$SRC_DIR/chrome/app/theme/chromium/linux/product_logo_48.png"
