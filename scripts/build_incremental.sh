@@ -10,7 +10,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-SRC_DIR="/Volumes/External/BaseChrome/ungoogled-chromium/build/src"
+SRC_DIR="/Volumes/External/BaseChrome/ungoogled-chromium-macos/build/src"
 OUT_DIR="$SRC_DIR/out/Default"
 
 # Colors
@@ -46,13 +46,11 @@ echo ""
 if [ ! -d "$SRC_DIR" ]; then
     error "Source directory not found: $SRC_DIR"
     echo ""
-    echo "You need to run a full build first."
+    echo "You need to initialize the project first:"
+    echo "  ./scripts/init.sh"
     echo ""
-    echo "If this is your first time:"
-    echo "  ./scripts/init.sh     # Complete setup (clone + build, 2-4 hours)"
-    echo ""
-    echo "If source exists but not built yet:"
-    echo "  cd ../ungoogled-chromium && export PYTHON=python3.13 && ./build.sh"
+    echo "Then run a full build:"
+    echo "  ./scripts/full-build.sh"
     echo ""
     exit 1
 fi
