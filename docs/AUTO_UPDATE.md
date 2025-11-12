@@ -353,9 +353,10 @@ echo "0.2.0" > VERSION
 - [x] Analysis of Chromium updater architecture - Complete (see CHROMIUM_UPDATER_ANALYSIS.md)
 - [x] Updater branding patch created - Complete (patches/baseone-updater-branding.patch)
 - [x] Patch added to patches/series - Complete
-- [ ] API extended to support Omaha protocol - To implement
-- [ ] Build with updater enabled - To test
-- [ ] End-to-end testing - To implement
+- [x] API extended to support Omaha protocol - Complete (POST /service/update2/json)
+- [ ] Build with updater enabled - In progress
+- [ ] End-to-end testing - Next
+- [ ] Deploy updated API to production - Next
 
 ### Lightweight Custom Approach (Alternative)
 
