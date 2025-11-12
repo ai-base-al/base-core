@@ -345,9 +345,20 @@ echo "0.2.0" > VERSION
 
 ## Implementation Status
 
+### Chromium chrome/updater Approach (Recommended)
+
 - [x] Server-side API (baseone-version-api) - Complete
 - [x] API deployed at one.base.al - Complete
 - [x] VERSION file created - Complete
+- [x] Analysis of Chromium updater architecture - Complete (see CHROMIUM_UPDATER_ANALYSIS.md)
+- [x] Updater branding patch created - Complete (patches/baseone-updater-branding.patch)
+- [x] Patch added to patches/series - Complete
+- [ ] API extended to support Omaha protocol - To implement
+- [ ] Build with updater enabled - To test
+- [ ] End-to-end testing - To implement
+
+### Lightweight Custom Approach (Alternative)
+
 - [ ] Version reading code (version_info.h/cc) - To implement
 - [ ] Update client (update_client.h/cc) - To implement
 - [ ] Update service (update_service.h/cc) - To implement

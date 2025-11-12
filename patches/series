@@ -4,3 +4,6 @@
 
 # BRANDING
 baseone-complete-icon-branding.patch
+
+# AUTO-UPDATE
+baseone-updater-branding.patch
