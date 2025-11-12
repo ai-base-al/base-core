@@ -262,15 +262,9 @@ else
 fi
 echo ""
 
-echo "Step 2: Building Chromium"
-echo "This will take 2-4 hours..."
-echo ""
-echo "Note: This implements the chromium build workflow safely"
-echo "      Original ungoogled-chromium/build.sh has been removed (too dangerous)"
-echo "      Reference copy saved at: scripts/chromium/build.sh.reference"
+echo "Step 2: Setting up build environment"
 echo ""
 
-# Build using safe modular approach (see scripts/chromium/build.sh.reference)
 cd "$UNGOOGLED_DIR"
 export PYTHON=python3.13
 
@@ -322,49 +316,29 @@ echo "Building Rust bindgen..."
 echo "Generating build files..."
 ./out/Default/gn gen out/Default --fail-on-unused-args 2>&1 | tee -a "$LOG_FILE"
 
-echo "Building Chrome (this takes 2-4 hours)..."
-ninja -C out/Default chrome chromedriver 2>&1 | tee -a "$LOG_FILE"
-BUILD_EXIT=$?
-
-if [ $BUILD_EXIT -ne 0 ]; then
-  echo ""
-  echo "ERROR: Chromium build failed with exit code $BUILD_EXIT"
-  echo "Check logs/build.log for details"
-  exit 1
-fi
-
-echo "Signing and packaging..."
-cd "$UNGOOGLED_DIR"
-"$_root_dir/sign_and_package_app.sh" 2>&1 | tee -a "$LOG_FILE"
-
 BUILD_SRC="$UNGOOGLED_DIR/build/src"
-echo "Build completed at: $BUILD_SRC"
 
-echo ""
-echo "Step 3: BaseOne patches can be applied with patches/ directory"
-echo "(Note: Currently patches must be applied manually - see patches/series)"
-
-echo ""
-echo "Step 4: For incremental rebuilds, use: ./scripts/build_incremental.sh"
+# Create symlink if needed
+if [ ! -L "$SRC_DIR" ]; then
+  echo "Creating symlink: $SRC_DIR -> $BUILD_SRC"
+  ln -s "$BUILD_SRC" "$SRC_DIR"
+fi
 
 echo ""
 echo "=========================================="
-echo "Initial setup complete!"
+echo "Initialization complete!"
 echo "=========================================="
 echo ""
 echo "Source location: $BUILD_SRC"
 echo "Symlink: $SRC_DIR -> $BUILD_SRC"
-echo "Browser location: $BUILD_SRC/out/Default/BaseOne.app"
 echo ""
-echo "To run the browser:"
-echo "  open \"$BUILD_SRC/out/Default/BaseOne.app\""
+echo "Next steps:"
 echo ""
-echo "For daily development:"
-echo "  - Make your changes to source files in $BUILD_SRC"
-echo "  - Run ./scripts/build.sh for incremental builds (10-30 min)"
+echo "1. Run full build (2-4 hours):"
+echo "   cd ../ungoogled-chromium && export PYTHON=python3.13 && ./build.sh"
 echo ""
-echo "To update ungoogled-chromium:"
-echo "  - Run ./scripts/sync.sh (will fetch updates, not re-clone)"
+echo "2. After build completes, for daily development:"
+echo "   ./scripts/build_incremental.sh  # Fast incremental builds (10-30 min)"
 echo ""
 echo "Note: Source code stays in ungoogled-chromium/build/src permanently"
 echo "      This prevents re-cloning on future builds!"
