@@ -46,13 +46,13 @@ echo ""
 if [ ! -d "$SRC_DIR" ]; then
     error "Source directory not found: $SRC_DIR"
     echo ""
-    echo "You need to run a full build first with:"
-    echo "  ./scripts/init.sh"
+    echo "You need to run a full build first."
     echo ""
-    echo "The init.sh script will:"
-    echo "  1. Clone ungoogled-chromium-macos repository"
-    echo "  2. Download Chromium source (~10GB)"
-    echo "  3. Build Chromium (2-4 hours)"
+    echo "If this is your first time:"
+    echo "  ./scripts/init.sh     # Complete setup (clone + build, 2-4 hours)"
+    echo ""
+    echo "If source exists but not built yet:"
+    echo "  cd ../ungoogled-chromium && export PYTHON=python3.13 && ./build.sh"
     echo ""
     exit 1
 fi
@@ -60,7 +60,13 @@ fi
 # Check if out directory exists
 if [ ! -d "$OUT_DIR" ]; then
     error "Build directory not found: $OUT_DIR"
-    error "You need to run a full build first with ./scripts/init.sh"
+    echo ""
+    echo "You need to run a full build first."
+    echo ""
+    echo "Run the full build with:"
+    echo "  cd ../ungoogled-chromium && export PYTHON=python3.13 && ./build.sh"
+    echo ""
+    exit 1
 fi
 
 # Check if args.gn exists
