@@ -1,83 +1,185 @@
-# Base Core Patches
+# BaseOne Patches
 
-This directory contains patch files that modify Chromium source code.
+This directory contains patch files that modify the Chromium source code to create BaseOne Browser.
 
 ## Overview
 
-Patches are applied during the `npm run sync` process and allow us to make modifications to Chromium without maintaining a full fork.
+Patches allow us to make targeted modifications to Chromium without maintaining a full fork. Each patch should do one thing well (Unix philosophy).
 
-## Patch Organization
+## Current Patch Organization
 
-Patches should be organized and named descriptively:
-- `001-feature-name.patch` - Major features
-- `fix-component-issue.patch` - Bug fixes
-- `disable-unwanted-feature.patch` - Removing features
+```
+patches/
+├── series                                    # Patch application order
+├── README.md                                 # This file
+└── baseone-complete-icon-branding.patch     # Icon branding (binary files)
+```
 
-## Creating a Patch
+## Patch Categories
 
-1. Make your changes in the Chromium source tree (`../src/`)
-2. Generate the patch:
-   ```bash
-   cd ../src
-   git add -A
-   git diff --staged > ../base/patches/descriptive-name.patch
-   ```
+### Branding
+- baseone-complete-icon-branding.patch - Complete BaseOne icon branding (PNG, SVG, ICNS files)
 
-3. Document the patch:
-   - Add a comment at the top describing what it does
-   - Update this README with the patch name and purpose
+### Features
+(No feature patches yet - sidepanels will go here)
+
+### Privacy & Security
+(Privacy enhancements will go here)
 
 ## Applying Patches
 
-Patches are applied automatically during sync:
+Patches are applied automatically by the apply_base.sh script:
+
 ```bash
-npm run sync
+# Apply all patches in order
+cd /Volumes/External/BaseChrome/base-core
+./scripts/apply_base.sh
 ```
 
-Or manually:
+This script:
+1. Reads patches/series file
+2. Applies each patch to ungoogled-chromium/build/src/
+3. Runs branding scripts (strings + icons)
+4. Shows summary of modified files
+
+## Creating a New Patch
+
+### 1. Make changes in Chromium source
+
 ```bash
-npm run apply_patches
+cd /Volumes/External/BaseChrome/ungoogled-chromium/build/src
+# Make your code changes
+git add -A
 ```
 
-## Resetting Patches
+### 2. Generate the patch
 
-To unapply all patches:
 ```bash
-python3 script/apply_patches.py --reset
+cd /Volumes/External/BaseChrome/ungoogled-chromium/build/src
+git diff --staged > /Volumes/External/BaseChrome/base-core/patches/my-feature.patch
 ```
 
-## Current Patches
+### 3. Add to series file
 
-*Document your patches here as you add them:*
+Edit `/Volumes/External/BaseChrome/base-core/patches/series` and add your patch:
 
-### Example Format:
-- **001-custom-branding.patch** - Adds Base branding to the browser UI
-- **disable-google-services.patch** - Removes additional Google service integrations
+```
+# Existing patches
+baseone-complete-icon-branding.patch
+
+# My new feature
+my-feature.patch
+```
+
+### 4. Test the patch
+
+```bash
+cd /Volumes/External/BaseChrome/base-core
+./scripts/apply_base.sh
+```
+
+### 5. Document the patch
+
+Add an entry to this README under the appropriate category.
+
+## Patch Naming Convention
+
+Follow these conventions for consistency:
+
+- baseone-{category}-{description}.patch - Core BaseOne modifications
+- basedev-{category}-{description}.patch - BaseDev specific features
+- fix-{component}-{issue}.patch - Bug fixes
+- disable-{feature}.patch - Feature removal
+
+Examples:
+- baseone-branding-icons.patch
+- basedev-sidepanel-reading.patch
+- fix-keychain-access.patch
+- disable-google-sync.patch
+
+## Incremental Builds
+
+After applying patches, use incremental builds:
+
+```bash
+cd /Volumes/External/BaseChrome/base-core
+./scripts/build_incremental.sh
+```
+
+This rebuilds only changed files (10-30 minutes vs 2-4 hours for full build).
+
+## Resetting Source
+
+To reset the Chromium source to clean state:
+
+```bash
+cd /Volumes/External/BaseChrome/ungoogled-chromium/build/src
+git reset --hard HEAD
+git clean -fd
+```
+
+Then reapply patches:
+
+```bash
+cd /Volumes/External/BaseChrome/base-core
+./scripts/apply_base.sh
+```
 
 ## Patch Guidelines
 
-1. **Keep patches focused** - One logical change per patch
-2. **Document thoroughly** - Explain why the patch is needed
-3. **Update regularly** - Rebase patches when updating Chromium version
-4. **Test thoroughly** - Ensure patches apply cleanly and don't break builds
-5. **Minimize conflicts** - Avoid modifying heavily-changed Chromium code when possible
+1. **Small and focused** - One logical change per patch
+2. **Well-documented** - Clear comments explaining what and why
+3. **Tested** - Must apply cleanly and build successfully
+4. **Maintained** - Update when rebasing to new Chromium versions
+5. **Reversible** - Should be possible to unapply safely
 
 ## Troubleshooting
 
-If patches fail to apply:
-1. Check if the target code has changed in the new Chromium version
+### Patch fails to apply
+
+```bash
+patch: **** malformed patch at line X
+```
+
+**Solution**: The patch may have been corrupted or is from a different Chromium version. Regenerate the patch.
+
+### Merge conflicts
+
+When updating Chromium versions, patches may conflict:
+
+1. Apply patches one by one to identify the conflicting patch
 2. Manually apply the changes to the new code
 3. Regenerate the patch
-4. Test that it applies cleanly
+4. Update series file if needed
 
-## Alternatives to Patches
+### Build fails after applying patches
 
-Consider using `chromium_src/` overrides instead of patches when:
-- Replacing an entire file
-- Adding new files
-- The change is substantial and self-contained
+1. Check that all patches applied successfully
+2. Review the patch changes - may conflict with each other
+3. Try applying patches in different order
+4. Check build logs for specific errors
 
-Patches are best for:
-- Small targeted changes
-- Modifications to code that can't be easily overridden
-- Disabling specific features
+## Binary File Patches
+
+Some patches include binary files (icons, images). These use git's binary diff format:
+
+```
+diff --git a/path/to/file.png b/path/to/file.png
+index abc123..def456 100644
+GIT binary patch
+literal 1234
+...base85 encoded data...
+```
+
+## Next Steps
+
+Before adding new features:
+1. Ensure current patches are well-organized
+2. Confirm incremental builds work
+3. Document setup process completely
+4. Test on clean system
+
+See /Volumes/External/BaseChrome/base-core/docs/ for:
+- SETUP.md - Complete setup guide for new laptops
+- BRANDING.md - Branding application process
+- BUILD.md - Build system documentation

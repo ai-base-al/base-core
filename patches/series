@@ -1,2 +1,6 @@
-basedev-sidepanel-test-minimal.patch
+# BaseOne Patch Series
+# Patches are applied in the order listed here
+# Format: one patch filename per line, blank lines and comments (starting with #) are ignored
+
+# BRANDING
 baseone-complete-icon-branding.patch
